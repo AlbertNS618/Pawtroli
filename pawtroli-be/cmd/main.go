@@ -1,0 +1,27 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"pawtroli-be/internal/api"
+	"pawtroli-be/internal/firebase"
+
+	"github.com/gorilla/mux"
+)
+
+func main() {
+	firebase.InitFirebase()
+	api.InitHandlers()
+
+	r := mux.NewRouter()
+
+	// Routes
+	r.HandleFunc("/login", api.HandleUserLogin).Methods("GET")
+	r.HandleFunc("/pets", api.CreatePet).Methods("POST")
+	r.HandleFunc("/pets/{petId}/updates", api.CreatePetUpdate).Methods("POST")
+	r.HandleFunc("/pets/{petId}/updates", api.GetPetUpdates).Methods("GET")
+
+	log.Println("🚀 Server running on :8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
