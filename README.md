@@ -1,0 +1,1 @@
+Paw-Troli is a pet hotel application that help pet owners to register their pets to be sheltered in a pet hotel. This app helps the pet owner to chat with the workers, receive updates, check up their pets via cctv, and other transactional needs.
