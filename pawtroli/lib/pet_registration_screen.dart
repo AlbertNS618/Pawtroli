@@ -33,7 +33,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
       final petId = Uuid().v4();
 
       final response = await http.post(
-        Uri.parse('http://localhost:8080/pets'),
+        Uri.parse('http://192.168.0.164:8080/pets'),
         headers: {'Content-Type': 'application/json'},
         body: '''
         {

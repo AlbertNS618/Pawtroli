@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
           "name": name,
           "phone": phone,
         }),
-      ); Logger.log('Login response: ${response.body}');
+      ); Logger.log('Login response: ${response.statusCode}');
       if (response.statusCode != 200) {
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
