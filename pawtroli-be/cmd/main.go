@@ -6,6 +6,7 @@ import (
 
 	"pawtroli-be/internal/api"
 	"pawtroli-be/internal/firebase"
+	"pawtroli-be/internal/middleware"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -18,10 +19,11 @@ func main() {
 	r := mux.NewRouter()
 
 	// Routes
-	r.HandleFunc("/login", api.HandleUserLogin).Methods("POST")
+	r.HandleFunc("/register", api.HandleUserRegister).Methods("POST")
 	r.HandleFunc("/pets", api.CreatePet).Methods("POST")
 	r.HandleFunc("/pets/{petId}/updates", api.CreatePetUpdate).Methods("POST")
 	r.HandleFunc("/pets/{petId}/updates", api.GetPetUpdates).Methods("GET")
+	r.Handle("/secure-endpoint", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("GET")
 
 	// Add CORS middleware
 	corsHandler := handlers.CORS(

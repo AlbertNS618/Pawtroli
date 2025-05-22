@@ -25,31 +25,45 @@ func InitHandlers() {
 	firestoreClient = client
 }
 
-// GET /login
-func HandleUserLogin(w http.ResponseWriter, r *http.Request) {
-    var user models.User
-    if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+// GET /register
+func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-    ctx := context.Background()
-    docRef := firestoreClient.Collection("users").Doc(user.ID)
+	ctx := context.Background()
+	docRef := firestoreClient.Collection("users").Doc(user.ID)
 
-    _, err := docRef.Set(ctx, map[string]interface{}{
-        "name":  user.Name,
-        "email": user.Email,
-		"phone": user.Phone,
+	_, err := docRef.Set(ctx, map[string]interface{}{
+		"name":      user.Name,
+		"email":     user.Email,
+		"phone":     user.Phone,
 		"createdAt": time.Now(),
-    }, firestore.MergeAll)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	}, firestore.MergeAll)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
+// SecureEndpointHandler handles authenticated requests to /secure-endpoint
+func SecureEndpointHandler(w http.ResponseWriter, r *http.Request) {
+	uid, ok := r.Context().Value("uid").(string)
+	if !ok || uid == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "authenticated",
+		"uid":    uid,
+	})
+}
 
 // POST /pets
 func CreatePet(w http.ResponseWriter, r *http.Request) {

@@ -38,3 +38,30 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func VerifyToken(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        authHeader := r.Header.Get("Authorization")
+        if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+            http.Error(w, "Missing auth token", http.StatusUnauthorized)
+            return
+        }
+
+        tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+        ctx := context.Background()
+        client, err := firebase.App.Auth(ctx)
+        if err != nil {
+            http.Error(w, "Failed to get auth client", http.StatusInternalServerError)
+            return
+        }
+
+        token, err := client.VerifyIDToken(ctx, tokenStr)
+        if err != nil {
+            http.Error(w, "Invalid token", http.StatusUnauthorized)
+            return
+        }
+
+        ctx = context.WithValue(r.Context(), "uid", token.UID)
+        next.ServeHTTP(w, r.WithContext(ctx))
+    })
+}
