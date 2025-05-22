@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as logger;
+import 'package:passwordfield/passwordfield.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -14,7 +15,7 @@ Future<void> signInWithEmail(String email, String password) async {
     final token = await credential.user?.getIdToken();
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/secure-endpoint'),
+      Uri.parse('http://192.168.0.164:8080/secure-endpoint'),
       headers: {
         'Content-Type': 'application/json',                
         'Authorization': 'Bearer $token',
@@ -29,7 +30,9 @@ Future<void> signInWithEmail(String email, String password) async {
 }
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  final VoidCallback onSignInSuccess;
+  final VoidCallback onRegisterTap;
+  const SignInScreen({super.key, required this.onSignInSuccess, required this.onRegisterTap});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -50,7 +53,7 @@ class _SignInScreenState extends State<SignInScreen> {
     });
     try {
       await signInWithEmail(_email, _password);
-      // Navigate or show success as needed
+      widget.onSignInSuccess(); // Navigate to home page
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -78,11 +81,33 @@ class _SignInScreenState extends State<SignInScreen> {
                 onChanged: (val) => _email = val,
                 validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
               ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+              PasswordField(
+                color: Colors.blue,
+                passwordConstraint: r'.*[@$#.*].*',
+                passwordDecoration: PasswordDecoration(),
+                hintText: 'must have special characters',
                 onChanged: (val) => _password = val,
-                validator: (val) => val == null || val.isEmpty ? 'Enter password' : null,
+                border: PasswordBorder(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.blue.shade100,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.blue.shade100,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(width: 2, color: Colors.red.shade200),
+                  ),
+                ),
+                errorMessage:
+                    'must contain special character either . * @ # \$',
               ),
               const SizedBox(height: 20),
               if (_error != null)
@@ -92,6 +117,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: _loading
                     ? const CircularProgressIndicator()
                     : const Text('Sign In'),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: widget.onRegisterTap,
+                child: const Text("Don't have an account? Register here"),
               ),
             ],
           ),

@@ -40,6 +40,7 @@ dependencies:
 
   firebase_core: ^2.30.0
   firebase_auth: ^4.17.8
+  passwordfield: ^0.2.0
 
 
 dev_dependencies:
@@ -66,7 +67,7 @@ flutter:
 
   assets:
     - assets/images/Splash_Screen.png
-    - assets/images/Splash_Screen_No_Logo.png
+    - assets/images/background.png
     - assets/images/logo.png
 
   # To add assets to your application, add an assets section, like this:
