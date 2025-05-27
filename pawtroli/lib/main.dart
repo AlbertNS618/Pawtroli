@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'signin_screen.dart';
-import 'register_screen.dart';
-import 'pet_registration_screen.dart';
-import 'home_page.dart'; // Create this if not present
+import 'screens/signin_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/pet_registration_screen.dart';
+import 'screens/home_page.dart'; // Create this if not present
 import 'firebase_options.dart';
 
 void main() async {

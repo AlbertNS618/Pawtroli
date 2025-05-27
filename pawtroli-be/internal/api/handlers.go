@@ -27,8 +27,8 @@ func InitHandlers() {
 
 // GET /register
 func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	user := new(models.User)
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -67,8 +67,8 @@ func SecureEndpointHandler(w http.ResponseWriter, r *http.Request) {
 
 // POST /pets
 func CreatePet(w http.ResponseWriter, r *http.Request) {
-	var pet models.Pet
-	if err := json.NewDecoder(r.Body).Decode(&pet); err != nil {
+	pet := new(models.Pet)
+	if err := json.NewDecoder(r.Body).Decode(pet); err != nil {
 		http.Error(w, "Invalid body", http.StatusBadRequest)
 		return
 	}
@@ -86,8 +86,8 @@ func CreatePet(w http.ResponseWriter, r *http.Request) {
 // POST /pets/{petId}/updates
 func CreatePetUpdate(w http.ResponseWriter, r *http.Request) {
 	petId := mux.Vars(r)["petId"]
-	var update models.PetUpdate
-	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+	update := new(models.PetUpdate)
+	if err := json.NewDecoder(r.Body).Decode(update); err != nil {
 		http.Error(w, "Invalid body", http.StatusBadRequest)
 		return
 	}
@@ -113,10 +113,10 @@ func GetPetUpdates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updates []models.PetUpdate
+	var updates []*models.PetUpdate
 	for _, doc := range docs {
-		var u models.PetUpdate
-		doc.DataTo(&u)
+		u := new(models.PetUpdate)
+		doc.DataTo(u)
 		u.ID = doc.Ref.ID
 		updates = append(updates, u)
 	}

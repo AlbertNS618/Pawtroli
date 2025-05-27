@@ -1,12 +1,7 @@
-import 'dart:developer' as Logger;
-
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:passwordfield/passwordfield.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-
+import '../services/auth_service.dart';
+// import '../models/user_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function(String userId) onRegister;
@@ -18,43 +13,32 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = ''; String name = '';
-  String phone = ''; String password = '';
+  String email = '', name = '', phone = '', password = '';
+  bool _loading = false;
+
+  final AuthService _authService = AuthService();
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _loading = true);
       try {
-        // 1. Register user with Firebase Auth
-        final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final user = await _authService.registerWithEmail(
           email: email,
           password: password,
+          name: name,
+          phone: phone,
         );
-        final uid = credential.user!.uid;
-
-        // 2. Send user data (including UID) to Go backend
-        final response = await http.post(
-          Uri.parse('http://192.168.0.164:8080/register'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            "id": uid, // Pass UID from Firebase Auth
-            "email": email,
-            "name": name,
-            "phone": phone,
-          }),
-        );
-        Logger.log('Register response: ${response.statusCode}');
-        if (response.statusCode != 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Register failed: ${response.body}')),
-          );
-          return;
-        }
-
-        widget.onRegister(uid); // Pass UID to next screen
-      } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Firebase Auth error: ${e.message}')),
-        );
+        widget.onRegister(user.id);
+      } catch (e) {
+        _showError(e.toString());
+      } finally {
+        setState(() => _loading = false);
       }
     }
   }
@@ -62,28 +46,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, 
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Register'),
-        titleTextStyle: TextStyle(
+        title: const Text('Register'),
+        titleTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
-        backgroundColor: Colors.transparent, // <-- Transparent background
-        // elevation: 0, // <-- No shadow
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background.png', // <-- Replace with your image path
+              'assets/images/background.png',
               fit: BoxFit.cover,
             ),
           ),
           Padding(
             padding: EdgeInsets.only(
-              top: kToolbarHeight + MediaQuery.of(context).padding.top+30,
+              top: kToolbarHeight + MediaQuery.of(context).padding.top + 50,
               left: 16,
               right: 16,
               bottom: 16,
@@ -93,9 +77,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 children: [
                   Container(
+                    color: const Color.fromRGBO(16, 48, 95, 1),
+                    child: Image.asset('assets/images/logo.png',
+                        height: 100, width: 240),
+                  ),
+                  Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -111,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
                             keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(labelText: 'Email'),
+                            decoration: const InputDecoration(labelText: 'Email'),
                             onChanged: (val) => email = val,
                             validator: (val) => val!.isEmpty ? 'Enter email' : null,
                           ),
@@ -119,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
-                            decoration: InputDecoration(labelText: 'Name'),
+                            decoration: const InputDecoration(labelText: 'Name'),
                             onChanged: (val) => name = val,
                             validator: (val) => val!.isEmpty ? 'Enter name' : null,
                           ),
@@ -127,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
-                            decoration: InputDecoration(labelText: 'Phone'),
+                            decoration: const InputDecoration(labelText: 'Phone'),
                             onChanged: (val) => phone = val,
                             validator: (val) => val!.isEmpty ? 'Enter phone' : null,
                           ),
@@ -138,7 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: Colors.blue,
                             passwordConstraint: r'.*[@$#.*].*',
                             passwordDecoration: PasswordDecoration(),
-                            hintText: 'must have special characters',
+                            hintText: 'Password',
                             onChanged: (val) => password = val,
                             border: PasswordBorder(
                               border: OutlineInputBorder(
@@ -155,19 +144,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide:
-                                    BorderSide(width: 2, color: Colors.red.shade200),
+                                borderSide: BorderSide(width: 2, color: Colors.red.shade200),
                               ),
                             ),
-                            errorMessage:
-                                'must contain special character either . * @ # \$',
+                            errorMessage: 'must contain special character either . * @ # \$',
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  ElevatedButton(onPressed: _submit, child: Text('Continue'))
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _loading ? null : _submit,
+                    child: _loading
+                        ? const CircularProgressIndicator()
+                        : const Text('Continue'),
+                  ),
                 ],
               ),
             ),

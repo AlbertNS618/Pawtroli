@@ -23,7 +23,7 @@ func main() {
 	r.HandleFunc("/pets", api.CreatePet).Methods("POST")
 	r.HandleFunc("/pets/{petId}/updates", api.CreatePetUpdate).Methods("POST")
 	r.HandleFunc("/pets/{petId}/updates", api.GetPetUpdates).Methods("GET")
-	r.Handle("/secure-endpoint", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("GET")
+	r.Handle("/secure-endpoint", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
 
 	// Add CORS middleware
 	corsHandler := handlers.CORS(
