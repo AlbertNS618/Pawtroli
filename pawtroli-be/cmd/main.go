@@ -12,6 +12,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func registerPetRoutes(r *mux.Router) {
+	pets := r.PathPrefix("/pets").Subrouter()
+	pets.HandleFunc("", api.CreatePet).Methods("POST")
+	pets.HandleFunc("/{petId}/updates", api.CreatePetUpdate).Methods("POST")
+	pets.HandleFunc("/{petId}/updates", api.GetPetUpdates).Methods("GET")
+}
+
+func registerChatRoutes(r *mux.Router) {
+	chats := r.PathPrefix("/chats").Subrouter()
+	chats.HandleFunc("", api.CreateChatRoom).Methods("POST")
+	chats.HandleFunc("/{roomId}/messages", api.SendMessage).Methods("POST")
+	chats.HandleFunc("/{roomId}/messages", api.GetMessages).Methods("GET")
+}
+
 func main() {
 	firebase.InitFirebase()
 	api.InitHandlers()
@@ -20,9 +34,8 @@ func main() {
 
 	// Routes
 	r.HandleFunc("/register", api.HandleUserRegister).Methods("POST")
-	r.HandleFunc("/pets", api.CreatePet).Methods("POST")
-	r.HandleFunc("/pets/{petId}/updates", api.CreatePetUpdate).Methods("POST")
-	r.HandleFunc("/pets/{petId}/updates", api.GetPetUpdates).Methods("GET")
+	registerPetRoutes(r)
+	registerChatRoutes(r)
 	r.Handle("/secure-endpoint", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
 
 	// Add CORS middleware
