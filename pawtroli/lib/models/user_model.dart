@@ -12,6 +12,7 @@ class UserModel {
     'email': email,
     'name': name,
     'phone': phone,
+    'role': 'user', // Default role
   };
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
