@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../services/chat_service.dart'; // Import your ChatService
@@ -23,11 +24,22 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatService _chatService = ChatService(); // Initialize ChatService
   List<ChatMessage> _messages = []; // Store messages locally
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _loadMessages(); // Load messages when the chat page is opened
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _loadMessages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _sendMessage(String content) async {
