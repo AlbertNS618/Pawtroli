@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chat_page.dart';
+import 'dart:developer' as developer;
 
 class AdminChatListPage extends StatelessWidget {
   final String adminId;
@@ -33,18 +34,18 @@ class AdminChatListPage extends StatelessWidget {
                 future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
                 builder: (context, userSnapshot) {
                   String userName = otherUserId;
-                  print("userSnapshot.hasData: ${userSnapshot.hasData}");
+                  developer.log("userSnapshot.hasData: ${userSnapshot.hasData}");
                   if (userSnapshot.hasData) {
-                    print("userSnapshot.data: ${userSnapshot.data}");
+                    developer.log("userSnapshot.data: ${userSnapshot.data}");
                     if (userSnapshot.data!.exists) {
                       final data = userSnapshot.data!.data() as Map<String, dynamic>;
-                      print("User data: $data");
+                      developer.log("User data: $data");
                       userName = data['name'] ?? "Unknown User";
                     } else {
-                      print("User document does not exist for $otherUserId");
+                      developer.log("User document does not exist for $otherUserId");
                     }
                   } else {
-                    print("No data for $otherUserId");
+                    developer.log("No data for $otherUserId");
                   }
                   return StreamBuilder<QuerySnapshot>(
                     stream: chat.reference

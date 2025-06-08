@@ -35,7 +35,7 @@ class Entry extends StatefulWidget {
 
 class _EntryState extends State<Entry> {
   String? userId;
-  bool showLogin = false;
+  bool showLogin = true;
   bool isSignedIn = false;
 
   void handleSignIn() {
@@ -59,11 +59,11 @@ class _EntryState extends State<Entry> {
     if (userId != null) {
       return PetRegistrationScreen(userId: userId!);
     }
-    if (showLogin) {
-      return RegisterScreen(onRegister: handleRegister);
+    if (showLogin == false) {
+      return RegisterScreen(onRegister: handleRegister, onSigninTap: () => setState(() => showLogin = true));
     }
     return SignInScreen(
-      onRegisterTap: () => setState(() => showLogin = true),
+      onRegisterTap: () => setState(() => showLogin = false),
       onSignInSuccess: handleSignIn,
     );
   }

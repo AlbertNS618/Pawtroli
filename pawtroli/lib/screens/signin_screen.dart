@@ -16,7 +16,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
-  String? _error;
+  // String? _error;
   bool _obscurePassword = true;
 
   final AuthService _authService = AuthService();
@@ -31,7 +31,6 @@ class _SignInScreenState extends State<SignInScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _loading = true;
-      _error = null;
     });
     try {
       await _authService.signInWithEmail(
@@ -39,11 +38,10 @@ class _SignInScreenState extends State<SignInScreen> {
         _passwordController.text,
       );
       widget.onSignInSuccess();
+    } on AuthException catch (e) {
+      _showError(e.message);
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
-      _showError(_error!);
+      _showError('An error occurred. Please try again.');
     } finally {
       setState(() {
         _loading = false;
@@ -95,13 +93,13 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildError() {
-    if (_error == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(_error!, style: const TextStyle(color: Colors.red)),
-    );
-  }
+  // Widget _buildError() {
+  //   if (_error == null) return const SizedBox.shrink();
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: Text(_error!, style: const TextStyle(color: Colors.red)),
+  //   );
+  // }
 
   Widget _buildFormContainer() {
     return Container(
@@ -123,6 +121,7 @@ class _SignInScreenState extends State<SignInScreen> {
             padding: const EdgeInsets.all(12.0),
             child: TextFormField(
               controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: 'Email'),
               validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
             ),
@@ -145,7 +144,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   },
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               validator: (val) {
@@ -162,7 +161,6 @@ class _SignInScreenState extends State<SignInScreen> {
             onPressed: _resetPassword,
             child: const Text('Forgot Password?', style: TextStyle(color: Colors.grey),),
           ),
-          _buildError(),
         ],
       ),
     );

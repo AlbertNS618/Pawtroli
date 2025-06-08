@@ -20,52 +20,100 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController _controller = TextEditingController();
   final ChatService _chatService = ChatService(); // Initialize ChatService
+  final ScrollController _scrollController = ScrollController(); // Add this line
   List<ChatMessage> _messages = []; // Store messages locally
   Timer? _pollingTimer;
+  int _lastMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadMessages(); // Load messages when the chat page is opened
+    WidgetsBinding.instance.addObserver(this); // Add observer
+    _loadMessages();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _loadMessages();
+    });
+    // Listen for keyboard open and scroll to bottom
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Remove observer
     _pollingTimer?.cancel();
     _controller.dispose();
+    _scrollController.dispose(); // Dispose the controller
     super.dispose();
   }
 
   Future<void> _sendMessage(String content) async {
     await _chatService.sendMessage(widget.chatId, widget.currentUserId, content);
-    _controller.clear(); 
-    _loadMessages(); // Reload messages after sending
+    _controller.clear();
+    await _loadMessages(); // Wait for messages to load
+    _scrollToBottom();
   }
 
   Future<void> _loadMessages() async {
     final messagesJson = await _chatService.getMessages(widget.chatId);
+    final newMessages = messagesJson.map<ChatMessage>((msg) {
+      // ...existing mapping code...
+      return ChatMessage(
+        id: msg['id'] ?? '',
+        senderId: msg['senderId'] ?? '',
+        receiverId: msg['receiverId'] ?? '',
+        text: msg['content'] ?? '',
+        timestamp: msg['timestamp'] is String
+            ? DateTime.parse(msg['timestamp'])
+            : msg['timestamp'] is Map && msg['timestamp']['_seconds'] != null
+                ? DateTime.fromMillisecondsSinceEpoch(msg['timestamp']['_seconds'] * 1000)
+                : DateTime.now(),
+      );
+    }).toList();
+
+    final shouldScroll = newMessages.length > _lastMessageCount || _isNearBottom();
+
     setState(() {
-      _messages = messagesJson.map<ChatMessage>((msg) {
-        print('Message: $msg'); // Debugging line
-        return ChatMessage(
-          id: msg['id'] ?? '',
-          senderId: msg['senderId'] ?? '',
-          receiverId: msg['receiverId'] ?? '',
-          text: msg['content'] ?? '',
-           timestamp: msg['timestamp'] is String
-              ? DateTime.parse(msg['timestamp'])
-              : msg['timestamp'] is Map && msg['timestamp']['_seconds'] != null
-                  ? DateTime.fromMillisecondsSinceEpoch(msg['timestamp']['_seconds'] * 1000)
-                  : DateTime.now(),
-        );
-      }).toList();
+      _messages = newMessages;
+      _lastMessageCount = newMessages.length;
     });
+
+    if (shouldScroll) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    }
+  }
+
+  bool _isNearBottom() {
+    if (!_scrollController.hasClients) return true;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    // If user is within 100 pixels of the bottom, consider it "at the bottom"
+    return (maxScroll - currentScroll) < 100;
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    // Called when the window metrics change (e.g., keyboard pops up)
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    if (bottomInset > 0) {
+      // Keyboard is visible
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    }
+    super.didChangeMetrics();
   }
 
   @override
@@ -79,6 +127,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController, // Attach controller here
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
@@ -114,33 +163,33 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isMe ? Color.fromRGBO(16, 48, 95, 1) : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                      child: Column(
+                        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 2),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isMe ? Color.fromRGBO(16, 48, 95, 1) : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
                               msg.text,
                               style: TextStyle(
                                 color: isMe ? Colors.white : Colors.black,
                                 fontSize: 16,
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              _formatTimestamp(msg.timestamp),
-                              style: TextStyle(
-                                color: isMe ? Colors.white70 : Colors.black54,
-                                fontSize: 12,
-                              ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatTimestamp(msg.timestamp),
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

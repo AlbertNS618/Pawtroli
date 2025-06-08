@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pawtroli/screens/chat_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_chat_list_page.dart';
+import 'dart:developer' as developer;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,7 +11,7 @@ class HomePage extends StatelessWidget {
   Function chatSystem() {
     // This function is not used in the current implementation
     return () {};
-  }
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +105,9 @@ class HomePage extends StatelessWidget {
         ),
         onPressed: () async {
           if (title == "Chat Button") {
-            print('Chat Button pressed');
+            developer.log('Chat Button pressed');
             final user = FirebaseAuth.instance.currentUser;
-            print(user);
+            developer.log('user: $user');
             if (user == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('You must be signed in!')),

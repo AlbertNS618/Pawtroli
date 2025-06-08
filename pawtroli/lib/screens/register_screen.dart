@@ -4,7 +4,8 @@ import '../widgets/logo_header.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function(String userId) onRegister;
-  const RegisterScreen({super.key, required this.onRegister});
+  final VoidCallback onSigninTap;
+  const RegisterScreen({super.key, required this.onRegister, required this.onSigninTap});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -193,6 +194,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.normal,
                               ),
                             ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: widget.onSigninTap,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 30),
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Already have an account? ",
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text: "Sign In",
+                              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],

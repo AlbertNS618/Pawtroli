@@ -4,19 +4,22 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:pawtroli/models/user_model.dart';
 import 'package:pawtroli/services/api_constants.dart';
+import 'dart:developer' as developer;
 
 class AuthService {
+   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   Future<UserModel> signInWithEmail(String email, String password) async {
     try {
-      print('Starting Firebase sign in');
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      developer.log('Starting Firebase sign in', name: 'AuthService');
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print('Firebase sign in done');
+      developer.log('Firebase sign in done', name: 'AuthService');
       final token = await credential.user?.getIdToken();
-      print('Got token $token');
-
+      developer.log('Got token $token', name: 'AuthService');
+      developer.log('Making HTTP request to backend', name: 'AuthService');
       final response = await http
           .post(
             Uri.parse(ApiConstants.login),
@@ -25,11 +28,11 @@ class AuthService {
               'Authorization': 'Bearer $token',
             },
           )
-          .timeout(const Duration(seconds: 10)); // <-- Add timeout here
+        .timeout(const Duration(seconds: 10));
 
-      print('HTTP response received');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      developer.log('HTTP response received', name: 'AuthService');
+      developer.log('Response status: ${response.statusCode}', name: 'AuthService');
+      developer.log('Response body: ${response.body}', name: 'AuthService');
 
       if (response.statusCode != 200) {
         throw Exception('Backend error: ${response.body}');
@@ -41,7 +44,24 @@ class AuthService {
     } on TimeoutException {
       throw Exception('Sign in request timed out. Please try again.');
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
+      switch (e.code) {
+        case 'invalid-email':
+          throw AuthException('The email address is not valid.');
+        case 'user-disabled':
+          throw AuthException('This user account has been disabled.');
+        case 'user-not-found':
+          throw AuthException('No account found for that email.');
+        case 'wrong-password':
+        case 'invalid-credential':
+        case 'invalid-password':
+          developer.log('${e.message}', name: 'AuthService', error: e);
+          throw AuthException('Incorrect email or password. Please try again.');
+        default:
+          throw AuthException('Sign in failed: ${e.message ?? e.code}');
+      }
+    } catch (e) {
+      throw AuthException('An error occurred. Please try again.');
+      // throw e;
     }
   }
 
@@ -68,7 +88,7 @@ class AuthService {
           "phone": phone,
           "role": "user", // Default role
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
         throw Exception('Register failed: ${response.body}');
@@ -91,4 +111,12 @@ class AuthService {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
 
+}
+
+class AuthException implements Exception {
+  final String message;
+  AuthException(this.message);
+
+  @override
+  String toString() => message;
 }
