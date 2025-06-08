@@ -8,7 +8,7 @@ import (
 	"pawtroli-be/internal/firebase"
 	"pawtroli-be/internal/middleware"
 
-	"github.com/gorilla/handlers"
+	// "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -36,15 +36,15 @@ func main() {
 	r.HandleFunc("/register", api.HandleUserRegister).Methods("POST")
 	registerPetRoutes(r)
 	registerChatRoutes(r)
-	r.Handle("/secure-endpoint", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
+	r.Handle("/login", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
 
 	// Add CORS middleware
-	corsHandler := handlers.CORS(
-		handlers.AllowedOrigins([]string{"*"}), // Change "*" to your frontend URL for production
-		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
-	)(r)
+	// corsHandler := handlers.CORS(
+	// 	handlers.AllowedOrigins([]string{"*"}), // Change "*" to your frontend URL for production
+	// 	handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
+	// 	handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+	// )(r)
 
 	log.Println("🚀 Server running on :8080")
-	log.Fatal(http.ListenAndServe("0.0.0.0:8080", corsHandler))
+	http.ListenAndServe("0.0.0.0:8080", r)
 }
