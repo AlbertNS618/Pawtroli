@@ -2,21 +2,23 @@ package firebase
 
 import (
 	"context"
-	"log"
 
-	firebase "firebase.google.com/go"
+	"pawtroli-be/internal/logger"
+
+	firebase "firebase.google.com/go/v4"
 	"google.golang.org/api/option"
 )
 
 var App *firebase.App
 
 func InitFirebase() {
-	log.Println("Initializing Firebase...")
-	opt := option.WithCredentialsFile("configs/firebase_config.json")
+	logger.LogInfo("Initializing Firebase...")
+	opt := option.WithCredentialsFile("C:/Users/Asus/Documents/Skripsi/Pawtroli/pawtroli-be/configs/firebase_config.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
-	log.Println("Firebase initialized successfully.")
 	if err != nil {
-		log.Fatalf("error initializing firebase: %v\n", err)
+		logger.LogErrorf("Error initializing firebase: %v", err)
+		panic(err)
 	}
 	App = app
+	logger.LogInfo("Firebase initialized successfully.")
 }

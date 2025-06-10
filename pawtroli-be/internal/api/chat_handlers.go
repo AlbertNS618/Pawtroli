@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
 	"pawtroli-be/internal/firebase"
+	"pawtroli-be/internal/logger"
 	"pawtroli-be/internal/models"
 
 	"cloud.google.com/go/firestore"
@@ -20,19 +20,22 @@ func InitHandlers() {
 	ctx := context.Background()
 	client, err := firebase.App.Firestore(ctx)
 	if err != nil {
-		log.Fatalf("❌ Failed to init Firestore: %v", err)
+		logger.LogErrorf("❌ Failed to init Firestore: %v", err)
+		panic(err)
 	}
 	firestoreClient = client
-	log.Println("✅ Firestore client initialized")
+	logger.LogInfo("✅ Firestore client initialized")
 }
 
 // POST /chats/{roomId}
 func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	roomId := mux.Vars(r)["roomId"]
-	log.Printf("CreateChatRoom called for roomId: %s", roomId)
+	logger.LogInfof("CreateChatRoom called for roomId: %s", roomId)
+
 	room := new(models.ChatRoom)
 	if err := json.NewDecoder(r.Body).Decode(room); err != nil {
-		log.Printf("Failed to decode chat room: %v", err)
+		logger.LogErrorf("Failed to decode chat room: %v", err)
 		http.Error(w, "Invalid body", http.StatusBadRequest)
 		return
 	}
@@ -42,30 +45,37 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	docRef := firestoreClient.Collection("chats").Doc(roomId)
 	docSnap, err := docRef.Get(context.Background())
 	if err == nil && docSnap.Exists() {
-		log.Printf("Chat room already exists: %s", roomId)
+		logger.LogInfof("Chat room already exists: %s", roomId)
 		room.ID = roomId
+		logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 		json.NewEncoder(w).Encode(room)
 		return
 	}
 
 	_, err = docRef.Set(context.Background(), room)
+	duration := time.Since(start)
 	if err != nil {
-		log.Printf("Failed to create chat room: %v", err)
+		logger.LogErrorf("Failed to create chat room: %v", err)
+		logger.LogFirestoreOperation("CREATE", "chats", roomId, false, duration)
 		http.Error(w, "Error creating chat room", http.StatusInternalServerError)
 		return
 	}
 	room.ID = roomId
-	log.Printf("Chat room created: %s", roomId)
+	logger.LogInfof("Chat room created: %s", roomId)
+	logger.LogFirestoreOperation("CREATE", "chats", roomId, true, duration)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	json.NewEncoder(w).Encode(room)
 }
 
 // POST /chats/{roomId}/messages
 func SendMessage(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	roomId := mux.Vars(r)["roomId"]
-	log.Printf("SendMessage called for roomId: %s", roomId)
+	logger.LogInfof("SendMessage called for roomId: %s", roomId)
+
 	msg := new(models.Message)
 	if err := json.NewDecoder(r.Body).Decode(msg); err != nil {
-		log.Printf("Failed to decode message: %v", err)
+		logger.LogErrorf("Failed to decode message: %v", err)
 		http.Error(w, "Invalid body", http.StatusBadRequest)
 		return
 	}
@@ -73,13 +83,17 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	msg.RoomID = roomId
 
 	doc, _, err := firestoreClient.Collection("chats").Doc(roomId).Collection("messages").Add(context.Background(), msg)
+	duration := time.Since(start)
 	if err != nil {
-		log.Printf("Failed to send message: %v", err)
+		logger.LogErrorf("Failed to send message: %v", err)
+		logger.LogFirestoreOperation("CREATE", "chats/"+roomId+"/messages", "", false, duration)
 		http.Error(w, "Error sending message", http.StatusInternalServerError)
 		return
 	}
 	msg.ID = doc.ID
-	log.Printf("Message sent with ID: %s in roomId: %s", msg.ID, roomId)
+	logger.LogInfof("Message sent with ID: %s in roomId: %s", msg.ID, roomId)
+	logger.LogFirestoreOperation("CREATE", "chats/"+roomId+"/messages", msg.ID, true, duration)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	json.NewEncoder(w).Encode(msg)
 }
 
@@ -93,11 +107,15 @@ type MessageResponse struct {
 
 // GET /chats/{roomId}/messages
 func GetMessages(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	roomId := mux.Vars(r)["roomId"]
-	log.Printf("GetMessages called for roomId: %s", roomId)
+	logger.LogInfof("GetMessages called for roomId: %s", roomId)
+
 	docs, err := firestoreClient.Collection("chats").Doc(roomId).Collection("messages").OrderBy("timestamp", firestore.Asc).Documents(context.Background()).GetAll()
+	duration := time.Since(start)
 	if err != nil {
-		log.Printf("Failed to fetch messages: %v", err)
+		logger.LogErrorf("Failed to fetch messages: %v", err)
+		logger.LogFirestoreOperation("READ", "chats/"+roomId+"/messages", "", false, duration)
 		http.Error(w, "Failed to fetch messages", http.StatusInternalServerError)
 		return
 	}
@@ -117,9 +135,11 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 			RoomID:    m.RoomID,
 			Timestamp: m.Timestamp.In(loc).Format(time.RFC3339),
 		})
-		log.Printf("Message: %+v", m)
+		logger.LogDebugf("Message: %+v", m)
 	}
-	log.Printf("Fetched %d messages for roomId: %s", len(messages), roomId)
+	logger.LogInfof("Fetched %d messages for roomId: %s", len(messages), roomId)
+	logger.LogFirestoreOperation("READ", "chats/"+roomId+"/messages", "", true, duration)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
 }

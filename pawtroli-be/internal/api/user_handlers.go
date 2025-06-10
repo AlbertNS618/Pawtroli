@@ -3,24 +3,27 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
-	"pawtroli-be/internal/models"
 	"time"
+
+	"pawtroli-be/internal/logger"
+	"pawtroli-be/internal/models"
 
 	"cloud.google.com/go/firestore"
 )
 
 // GET /register
 func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
-	log.Println("HandleUserRegister called")
+	start := time.Now()
+	logger.LogInfo("HandleUserRegister called")
+
 	user := new(models.User)
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
-		log.Printf("Failed to decode user: %v", err)
+		logger.LogErrorf("Failed to decode user: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Printf("Registering user: %+v", user)
+	logger.LogInfof("Registering user: %+v", user)
 
 	ctx := context.Background()
 	docRef := firestoreClient.Collection("users").Doc(user.ID)
@@ -32,24 +35,32 @@ func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
 		"role":      user.Role, // "user" or "admin"
 		"createdAt": time.Now(),
 	}, firestore.MergeAll)
+
+	duration := time.Since(start)
 	if err != nil {
-		log.Printf("Failed to save user: %v", err)
+		logger.LogErrorf("Failed to save user: %v", err)
+		logger.LogFirestoreOperation("CREATE", "users", user.ID, false, duration)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("User registered: %s", user.ID)
+	logger.LogInfof("User registered: %s", user.ID)
+	logger.LogFirestoreOperation("CREATE", "users", user.ID, true, duration)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, duration)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
 // SecureEndpointHandler handles authenticated requests to /login
 func SecureEndpointHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("SecureEndpointHandler called: method=%s, url=%s, remoteAddr=%s, headers=%v",
-		r.Method, r.URL.Path, r.RemoteAddr, r.Header)
+	start := time.Now()
+	logger.LogInfof("SecureEndpointHandler called: method=%s, url=%s, remoteAddr=%s",
+		r.Method, r.URL.Path, r.RemoteAddr)
+
 	uid, ok := r.Context().Value("uid").(string)
-	log.Print("User ID from context:", uid)
+	logger.LogInfof("User ID from context: %s", uid)
+
 	if !ok || uid == "" {
-		log.Println("Unauthorized access attempt to /login")
+		logger.LogWarning("Unauthorized access attempt to /login")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -57,19 +68,26 @@ func SecureEndpointHandler(w http.ResponseWriter, r *http.Request) {
 	// Fetch user data from Firestore
 	ctx := context.Background()
 	doc, err := firestoreClient.Collection("users").Doc(uid).Get(ctx)
+	duration := time.Since(start)
+
 	if err != nil {
-		log.Printf("Failed to get user data: %v", err)
+		logger.LogErrorf("Failed to get user data: %v", err)
+		logger.LogFirestoreOperation("READ", "users", uid, false, duration)
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
-	data := doc.Data()
 
+	data := doc.Data()
 	name, _ := data["name"].(string)
 	email, _ := data["email"].(string)
 	phone, _ := data["phone"].(string)
 	role, _ := data["role"].(string)
 
-	log.Printf("Authenticated user: %s", uid)
+	logger.LogInfof("Authenticated user: %s", uid)
+	logger.LogFirestoreOperation("READ", "users", uid, true, duration)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
+	logger.LogAuthOperation("login", uid, true)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "authenticated",
