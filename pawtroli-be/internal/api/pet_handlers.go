@@ -9,8 +9,8 @@ import (
 	"pawtroli-be/internal/logger"
 	"pawtroli-be/internal/models"
 
-	"cloud.google.com/go/firestore"
 	"github.com/gorilla/mux"
+	"google.golang.org/api/iterator"
 )
 
 // POST /pets
@@ -58,7 +58,6 @@ func CreatePetUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	update.Timestamp = time.Now()
-	update.Shared = false
 
 	_, _, err := firestoreClient.Collection("pets").Doc(petId).Collection("updates").Add(context.Background(), update)
 	duration := time.Since(start)
@@ -80,33 +79,33 @@ func GetPetUpdates(w http.ResponseWriter, r *http.Request) {
 	petId := mux.Vars(r)["petId"]
 	logger.LogInfof("GetPetUpdates called for petId: %s", petId)
 
-	docs, err := firestoreClient.Collection("pets").Doc(petId).Collection("updates").
-		OrderBy("timestamp", firestore.Desc).Documents(context.Background()).GetAll()
-	duration := time.Since(start)
-	if err != nil {
-		logger.LogErrorf("Failed to fetch pet updates: %v", err)
-		logger.LogFirestoreOperation("READ", "pets/"+petId+"/updates", "", false, duration)
-		http.Error(w, "Failed to fetch updates", http.StatusInternalServerError)
-		return
-	}
+	ctx := context.Background()
+	iter := firestoreClient.Collection("pet_updates").Where("petId", "==", petId).Documents(ctx)
+	defer iter.Stop()
 
-	var updates []*models.PetUpdate
-	for _, doc := range docs {
-		u := new(models.PetUpdate)
-		err := doc.DataTo(u)
+	var updates []models.PetUpdate
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
 		if err != nil {
+			logger.LogErrorf("Error fetching pet updates: %v", err)
+			http.Error(w, "Failed to fetch updates", http.StatusInternalServerError)
 			return
 		}
-		u.ID = doc.Ref.ID
-		updates = append(updates, u)
+		var update models.PetUpdate
+		if err := doc.DataTo(&update); err != nil {
+			logger.LogErrorf("Error decoding pet update: %v", err)
+			continue
+		}
+		update.ID = doc.Ref.ID
+		updates = append(updates, update)
+		logger.LogInfof("Fetched update: %+v", update)
 	}
-
+	print("updates: ", updates)
 	logger.LogInfof("Fetched %d updates for petId: %s", len(updates), petId)
-	logger.LogFirestoreOperation("READ", "pets/"+petId+"/updates", "", true, duration)
 	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(updates)
-	if err != nil {
-		return
-	}
+	json.NewEncoder(w).Encode(updates)
 }

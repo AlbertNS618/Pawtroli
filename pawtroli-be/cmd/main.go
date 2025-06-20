@@ -83,6 +83,7 @@ func main() {
 	logger.LogInfo("🚀 Server running on :8080")
 	err := http.ListenAndServe("0.0.0.0:8080", r)
 	if err != nil {
+		 logger.LogErrorf("Server failed: %v", err)
 		return
 	}
 }
