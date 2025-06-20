@@ -37,11 +37,15 @@ dependencies:
   uuid: ^4.5.1
   http: ^1.4.0
   image_picker: ^1.1.2
+  intl: ^0.18.1
 
   firebase_core: ^2.30.0
   firebase_auth: ^4.17.8
   passwordfield: ^0.2.0
   cloud_firestore: ^4.15.5
+
+  flutter_vlc_player: ^7.4.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +74,11 @@ flutter:
     - assets/images/background.png
     - assets/images/logo.png
     - assets/images/pet_placeholder.png
+    - assets/images/pet_add.png
+    - assets/images/home_icon.png
+    - assets/images/chat_icon.png
+    - assets/images/cctv_icon.png
+    - assets/images/activity_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

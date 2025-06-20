@@ -5,6 +5,7 @@ class UserModel {
   final String name;
   final String phone;
   final String role; // Default role
+  final String profileImage;
 
   UserModel({
     required this.id,
@@ -12,6 +13,7 @@ class UserModel {
     required this.name,
     required this.phone,
     this.role = 'user', // Set default role to 'user'
+    required this.profileImage,
   });
 
   Map<String, dynamic> toJson() => {
@@ -20,6 +22,7 @@ class UserModel {
     'name': name,
     'phone': phone,
     'role': role, // Use the actual role value
+    'profileImage': profileImage,
   };
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
@@ -28,5 +31,6 @@ class UserModel {
     email: json["email"] ?? "",
     phone: json["phone"] ?? "",
     role: json["role"] ?? 'user', // Default to 'user' if not provided
+    profileImage: json["profileImage"] ?? "",
   );
 }

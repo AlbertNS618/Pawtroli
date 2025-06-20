@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../widgets/logo_header.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/logo_header.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function(String userId) onRegister;
@@ -43,6 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           phone: _phoneController.text.trim(),
         );
         widget.onRegister(user.id);
+        Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
         setState(() {
           _error = e.toString();
@@ -92,7 +93,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
               validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
             ),
           ),
@@ -100,7 +122,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(
+                labelText: 'Name',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
               validator: (val) => val == null || val.isEmpty ? 'Enter name' : null,
             ),
           ),
@@ -108,7 +151,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
               controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Phone'),
+              decoration: InputDecoration(
+                labelText: 'Phone',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
               validator: (val) => val == null || val.isEmpty ? 'Enter phone' : null,
             ),
           ),
@@ -187,7 +251,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: _loading
                           ? const CircularProgressIndicator()
                           : const Text(
-                              'Continue',
+                              'Register',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 18,

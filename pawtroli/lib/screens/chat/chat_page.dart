@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../models/chat_message.dart';
-import '../services/chat_service.dart'; // Import your ChatService
+import 'package:pawtroli/design_constant.dart';
+import '../../models/chat_message.dart';
+import '../../services/chat_service.dart'; // Import your ChatService
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -120,6 +121,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: DesignConstant.pawBlue,
         title: Text(widget.otherUserName),
         leading: BackButton(),
       ),
@@ -207,7 +209,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     decoration: InputDecoration(
                       hintText: 'Type a message',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                     ),
@@ -215,7 +217,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 ),
                 SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Colors.blue[700]),
+                  icon: Icon(Icons.send, color: DesignConstant.pawBlue),
                   onPressed: () => _sendMessage(_controller.text.trim()),
                 ),
               ],

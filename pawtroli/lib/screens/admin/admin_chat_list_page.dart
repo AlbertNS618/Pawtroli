@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'chat_page.dart';
+import '../chat/chat_page.dart';
 import 'dart:developer' as developer;
 
 class AdminChatListPage extends StatelessWidget {
@@ -55,12 +55,12 @@ class AdminChatListPage extends StatelessWidget {
                     builder: (context, msgSnapshot) {
                       String lastMsg = '';
                       if (msgSnapshot.hasData && msgSnapshot.data!.docs.isNotEmpty) {
-                        // Find the latest message sent by the user (not admin)
-                        final userMsg = msgSnapshot.data!.docs
-                            .firstWhere(
-                              (doc) => doc['senderId'] == otherUserId,
-                              orElse: () => msgSnapshot.data!.docs.first,
-                            );
+                        final userDocs = msgSnapshot.data!.docs
+                            .where((doc) => doc['senderId'] == otherUserId)
+                            .toList();
+                        final userMsg = userDocs.isNotEmpty
+                            ? userDocs.first
+                            : msgSnapshot.data!.docs.first;
                         lastMsg = userMsg['content'] ?? '';
                       }
                       return ListTile(

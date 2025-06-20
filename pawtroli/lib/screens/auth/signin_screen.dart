@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../widgets/logo_header.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/logo_header.dart';
 
 class SignInScreen extends StatefulWidget {
   final VoidCallback onSignInSuccess;
@@ -57,7 +57,27 @@ class _SignInScreenState extends State<SignInScreen> {
         title: const Text('Reset Password'),
         content: TextField(
           controller: emailController,
-          decoration: const InputDecoration(labelText: 'Enter your email'),
+          decoration: InputDecoration(
+            hintText: 'Email',
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30), // Makes the box rounded
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
+                width: 2,
+              ),
+            ),
+          ),
         ),
         actions: [
           TextButton(
@@ -93,14 +113,6 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  // Widget _buildError() {
-  //   if (_error == null) return const SizedBox.shrink();
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Text(_error!, style: const TextStyle(color: Colors.red)),
-  //   );
-  // }
-
   Widget _buildFormContainer() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -118,11 +130,32 @@ class _SignInScreenState extends State<SignInScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.fromLTRB(10, 16, 10, 12),
             child: TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                hintText: 'Email',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
               validator: (val) => val == null || val.isEmpty ? 'Enter email' : null,
             ),
           ),
