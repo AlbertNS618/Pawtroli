@@ -3,33 +3,39 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:pawtroli/design_constant.dart';
 import 'package:pawtroli/widgets/bottom_navbar.dart';
 
-class CCTVPage extends StatefulWidget {
-  const CCTVPage({super.key});
+class AdminCCTVPage extends StatefulWidget {
+  const AdminCCTVPage({super.key});
 
+  
   @override
-  State<CCTVPage> createState() => _CCTVPageState();
+  State<AdminCCTVPage> createState() => _AdminCCTVPageState();
 }
 
-class _CCTVPageState extends State<CCTVPage> {
+class _AdminCCTVPageState extends State<AdminCCTVPage> {
   late VlcPlayerController _bedroomController;
   // late VlcPlayerController _playgroundController;
 
   @override
   void initState() {
     super.initState();
-    _bedroomController = VlcPlayerController.network(
-      'rtsp://192.168.0.113:554/profile0',
-      hwAcc: HwAcc.full,
-      autoPlay: true,
-      options: VlcPlayerOptions(),
-    );
-    // Example: Use a different RTSP or placeholder for playground
-    // _playgroundController = VlcPlayerController.network(
-    //   'rtsp://192.168.0.113:554/profile0', // Replace with actual playground RTSP if available
-    //   hwAcc: HwAcc.full,
-    //   autoPlay: true,
-    //   options: VlcPlayerOptions(),
-    // );
+    try {
+      _bedroomController = VlcPlayerController.network(
+        'rtsp://192.168.0.113:554/profile0',
+        hwAcc: HwAcc.full,
+        autoPlay: true,
+        options: VlcPlayerOptions(),
+      );
+      // Example: Use a different RTSP or placeholder for playground
+      // _playgroundController = VlcPlayerController.network(
+      //   'rtsp://192.168.0.113:554/profile0', // Replace with actual playground RTSP if available
+      //   hwAcc: HwAcc.full,
+      //   autoPlay: true,
+      //   options: VlcPlayerOptions(),
+      // );
+    } catch (e) {
+      print('VLC error: $e');
+      // Handle error, show fallback UI or message
+    }
   }
 
   @override
@@ -46,8 +52,13 @@ class _CCTVPageState extends State<CCTVPage> {
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
-        title: const Text('CCTV', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        toolbarHeight: 85, // <-- set exact height of AppBar
+        title: const Text(
+          'CCTV',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
+        automaticallyImplyLeading: false, // This prevents the automatic back button
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -61,9 +72,9 @@ class _CCTVPageState extends State<CCTVPage> {
         currentIndex: 2,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, '/admin_home');
           } else if (index == 1) {
-            goToChat(context); // Now imported from bottom_navbar.dart
+            Navigator.pushReplacementNamed(context, '/admin_chat');
           } else if (index == 2) {
             // Already on CCTV
           }

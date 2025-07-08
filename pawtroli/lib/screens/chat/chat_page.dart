@@ -122,8 +122,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
-        title: Text(widget.otherUserName),
-        leading: BackButton(),
+        title: Text(widget.otherUserName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        toolbarHeight: 80,
+        leading: BackButton(color: Colors.white,),
       ),
       body: Column(
         children: [
@@ -172,7 +173,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             margin: const EdgeInsets.symmetric(vertical: 2),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isMe ? Color.fromRGBO(16, 48, 95, 1) : Colors.grey[300],
+                              color: isMe ? DesignConstant.pawBlue : Colors.grey[300],
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(

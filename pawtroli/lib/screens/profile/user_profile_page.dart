@@ -59,8 +59,18 @@ class UserProfilePage extends StatelessWidget {
                         width: 300,
                         child: ElevatedButton(
                           onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
+                            try {
+                              await FirebaseAuth.instance.signOut();
+                              // replace the current page with your sign‐in screen
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                '/signin',
+                                (Route<dynamic> route) => false
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Logout failed: $e')),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red.shade400,

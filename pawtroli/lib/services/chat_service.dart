@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api_constants.dart';
+import '../api_constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatService {
   // Generate a unique chat room ID for a user pair
@@ -40,5 +41,26 @@ class ChatService {
       return jsonDecode(response.body);
     }
     return [];
+  }
+
+  /// Returns a map with 'senderId' and 'content' of the latest message.
+  Future<Map<String,String>> getLatestMessageInfo(String chatId) async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+      if (snap.docs.isEmpty) return {};
+      final data = snap.docs.first.data();
+      return {
+        'senderId': data['senderId'] as String? ?? '',
+        'content':  data['content']  as String? ?? '',
+      };
+    } catch (_) {
+      return {};
+    }
   }
 }

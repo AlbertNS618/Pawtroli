@@ -46,8 +46,10 @@ class _CCTVPageState extends State<CCTVPage> {
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
+        toolbarHeight: 85, // <-- set exact height of AppBar
         title: const Text('CCTV', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        automaticallyImplyLeading: false, // This prevents the automatic back button
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

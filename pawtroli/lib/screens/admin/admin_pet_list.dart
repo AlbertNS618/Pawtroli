@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pawtroli/design_constant.dart';
 import 'package:pawtroli/widgets/bottom_navbar.dart';
 
 class AdminPetListPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _AdminPetListPageState extends State<AdminPetListPage> {
         preferredSize: const Size.fromHeight(90),
         child: Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF0B2341),
+            color: DesignConstant.pawBlue,
           ),
           child: SafeArea(
             child: Padding(
@@ -95,7 +96,7 @@ class _AdminPetListPageState extends State<AdminPetListPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(_layoutMode == 0 ? Icons.grid_view : Icons.list, color: Color(0xFF0B2341)),
+                  icon: Icon(_layoutMode == 0 ? Icons.grid_view : Icons.list, color: DesignConstant.pawBlue),
                   onPressed: () {
                     setState(() {
                       _layoutMode = _layoutMode == 0 ? 1 : 0;

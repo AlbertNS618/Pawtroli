@@ -46,6 +46,7 @@ dependencies:
 
   flutter_vlc_player: ^7.4.0
   path_provider: ^2.1.5
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,9 @@ flutter:
     - assets/images/chat_icon.png
     - assets/images/cctv_icon.png
     - assets/images/activity_icon.png
+    - assets/images/pet_activity.png
+    - assets/images/add_image.png
+    - assets/images/upload.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

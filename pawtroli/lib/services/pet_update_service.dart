@@ -1,33 +1,81 @@
-import '../models/pet_update_model.dart';
-import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer' as developer;
+
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'api_constants.dart';
+import '../models/pet_update_model.dart';
+import '../api_constants.dart';
 
 class PetUpdateService {
-
   Future<List<PetUpdateModel>> getPetUpdates(String petId) async {
-    print('Fetching updates for pet ID: $petId');
-    final response = await http.get(Uri.parse('${ApiConstants.pets}/$petId/updates'));
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => PetUpdateModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load pet updates');
+    try {
+      final uri = Uri.parse('${ApiConstants.pets}/$petId/updates');
+      final response = await http
+          .get(uri)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((j) => PetUpdateModel.fromJson(j)).toList();
+      } else {
+        throw Exception(
+            'Failed to load pet updates (Status ${response.statusCode})');
+      }
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on TimeoutException {
+      throw Exception('Loading pet updates timed out');
+    } on FormatException {
+      throw Exception('Bad response format');
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
+    }
+  }
+
+  Future<bool> addPetUpdate(PetUpdateModel update, {required String petId}) async {
+    try {
+      final uri = Uri.parse('${ApiConstants.pets}/$petId/updates');
+      final body = json.encode(update.toJson());
+      final response = await http
+          .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode != 201) {
+        throw Exception(
+            'Failed to add update (Status ${response.statusCode}): ${response.body}');
+      }
+      developer.log('Pet update added successfully');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on TimeoutException {
+      throw Exception('Posting update timed out');
+    } catch (e) {
+      throw Exception('Failed to add pet update: $e');
     }
   }
 
   Future<void> downloadUpdate(PetUpdateModel update) async {
     if (update.imageUrl.isEmpty) return;
-    final response = await http.get(Uri.parse(update.imageUrl));
-    if (response.statusCode == 200) {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/${update.id}.jpg');
-      await file.writeAsBytes(response.bodyBytes);
-      // Optionally, show a notification or snackbar
-    } else {
-      throw Exception('Failed to download image');
+    try {
+      final uri = Uri.parse(update.imageUrl);
+      final response = await http
+          .get(uri)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final dir = await getApplicationDocumentsDirectory();
+        final file = File('${dir.path}/${update.id}.jpg');
+        await file.writeAsBytes(response.bodyBytes);
+      } else {
+        throw Exception(
+          'Failed to download image (Status ${response.statusCode})');
+      }
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on TimeoutException {
+      throw Exception('Image download timed out');
+    } catch (e) {
+      throw Exception('Failed to download image: $e');
     }
   }
 }

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:pawtroli/models/user_model.dart';
-import 'package:pawtroli/services/api_constants.dart';
+import 'package:pawtroli/api_constants.dart';
 import 'dart:developer' as developer;
 
 class AuthService {

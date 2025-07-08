@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:pawtroli/design_constant.dart';
+import 'package:pawtroli/widgets/info_card.dart'; // ← add this
 import '../../models/pet_model.dart';
 import '../../services/pet_service.dart'; // Import the PetService
-import 'pet_updates_screen.dart';
 
 class PetProfilePage extends StatelessWidget {
   final String petId;
@@ -12,61 +12,93 @@ class PetProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Pet Profile'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-        ),
-      ),
-      body: FutureBuilder<PetModel>(
-        future: PetService().getPetProfile(petId), // Use PetService here
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final pet = snapshot.data!;
-          // final isActive = pet.active == true;
+    return FutureBuilder<PetModel>(
+      future: PetService().getPetProfile(petId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final pet = snapshot.data!;
 
-          // Improved checkout date parsing and reminder logic
-          DateTime? checkOutDate;
-          if (pet.checkOut != null) {
-            try {
-              if (pet.checkOut != null && pet.checkOut.runtimeType.toString() == 'Timestamp') {
-                // Handle Firestore Timestamp object
-                final seconds = pet.checkOut?.seconds;
-                checkOutDate = DateTime.fromMillisecondsSinceEpoch(seconds! * 1000);
-              } else if (pet.checkOut is Map && (pet.checkOut as Map?)?.containsKey('seconds') == true) {
-                // Handle timestamp as an object with seconds field
-                final seconds = pet.checkOut?.seconds;
-                checkOutDate = DateTime.fromMillisecondsSinceEpoch(seconds! * 1000);
-              } else if (pet.checkOut is String && pet.checkOut != '-') {
-                // Try parsing as a date string
-                checkOutDate = DateTime.tryParse(formatDate(pet.checkOut!));
-              }
-              developer.log("Parsed checkout date: $checkOutDate");
-            } catch (e) {
-              developer.log("Error parsing checkout date: $e");
+        // final isActive = pet.active == true;
+
+        // Improved checkout date parsing and reminder logic
+        DateTime? checkOutDate;
+        if (pet.checkOut != null) {
+          try {
+            developer.log("Raw checkOut value: ${pet.checkOut}");
+
+            // Handle ISO 8601 string format from Go backend
+            if (pet.checkOut is String) {
+              checkOutDate = DateTime.parse(pet.checkOut);
             }
-          }
+            // Handle Map format (legacy case)
+            else if (pet.checkOut is Map) {
+              final seconds = pet.checkOut['seconds'];
+              if (seconds != null) {
+                checkOutDate = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+              }
+            }
 
-          bool showReminder = false;
-          if (checkOutDate != null && pet.active == true) {
-            final now = DateTime.now();
-            final today = DateTime(now.year, now.month, now.day);
-            final checkoutDay = DateTime(checkOutDate.year, checkOutDate.month, checkOutDate.day);
-            final difference = checkoutDay.difference(today).inDays;
-            
-            developer.log("Days until checkout: $difference");
-            showReminder = difference == 1; // Show reminder if checkout is tomorrow
+            developer.log("Parsed checkout date: $checkOutDate");
+          } catch (e) {
+            developer.log("Error parsing checkout date: $e");
           }
+        }
 
-          return SingleChildScrollView(
+        bool showReminder = false;
+        if (checkOutDate != null && pet.active == true) {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final checkoutDay = DateTime(checkOutDate.year, checkOutDate.month, checkOutDate.day);
+          final difference = checkoutDay.difference(today).inDays;
+
+          developer.log("Days until checkout: $difference");
+          showReminder = difference == 1; // Show reminder if checkout is tomorrow
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: const Text('Pet Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black87),
+              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+            ),
+            actions: [
+              if (pet.active == false)
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete Pet'),
+                        content: const Text('Are you sure you want to delete this pet?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      await PetService().deletePet(petId);
+                      Navigator.pushReplacementNamed(context, '/home');
+                    }
+                  },
+                ),
+            ],
+          ),
+          body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -109,32 +141,55 @@ class PetProfilePage extends StatelessWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 1.8, // Decreased from 2.0 to give more height
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                      crossAxisCount: 2, childAspectRatio: 1.8, crossAxisSpacing: 12, mainAxisSpacing: 12
                     ),
                     children: [
-                      _infoCard('Gender', pet.gender),
-                      _infoCard('Color', pet.color),
-                      _infoCard('Age', '${pet.age.toString()} years old'),
-                      _infoCard('Allergy', pet.allergy),
-                      _infoCard('Checked-In', pet.checkIn != null ? formatDate(pet.checkIn!) : '-'),
-                      _infoCard('Checked-Out', pet.checkOut != null ? formatDate(pet.checkOut!) : '-'),
+                      InfoCard(
+                        label: 'Gender',
+                        value: pet.gender,
+                        onConfirm: pet.active == true
+                          ? null
+                          : (v) => PetService().updateField(petId, 'gender', v),
+                      ),
+                      InfoCard(
+                        label: 'Color',
+                        value: pet.color,
+                        onConfirm: pet.active == true
+                          ? null
+                          : (v) => PetService().updateField(petId, 'color', v),
+                      ),
+                      InfoCard(
+                        label: 'Age',
+                        value: '${pet.age} years old',
+                        onConfirm: pet.active == true
+                          ? null
+                          : (v) => PetService().updateField(petId, 'age', int.tryParse(v) ?? pet.age),
+                      ),
+                      InfoCard(
+                        label: 'Allergy',
+                        value: pet.allergy,
+                        onConfirm: pet.active == true
+                          ? null
+                          : (v) => PetService().updateField(petId, 'allergy', v),
+                      ),
+                      // Checked-In / Checked-Out get no callbacks at all:
+                      InfoCard(
+                        label: 'Checked-In',
+                        value: pet.checkIn != null ? formatDate(pet.checkIn!) : '-',
+                      ),
+                      InfoCard(
+                        label: 'Checked-Out',
+                        value: pet.checkOut != null ? formatDate(pet.checkOut!) : '-',
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PetUpdatesScreen(petId: petId),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/pet_updates', arguments: petId);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[900],
+                      backgroundColor: DesignConstant.pawBlue,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(
@@ -165,81 +220,90 @@ class PetProfilePage extends StatelessWidget {
                         color: Colors.orange[100],
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'Reminder: Your pet will be checked out tomorrow!',
-                        style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                      child: Text(
+                        'Reminder: Your pet ${pet.name} is scheduled to check out tomorrow at ${formatDate(pet.checkOut!).substring(0,8)}. Please confirm or contact the staff if needed.',
+                        style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
                       ),
                     ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Text(
+                      'Pet ID: $petId',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _infoCard(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          const SizedBox(height: 4),
-          // Add Flexible to allow text to wrap if needed
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2, // Allow up to 2 lines for longer content
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+          )
+        );
+    },
+  );
+}
 
   String formatDate(dynamic dateValue) {
-    if (dateValue == null || dateValue == '' || dateValue == '-') return '-';
+    // 1) null/empty/default dash → '-'
+    if (dateValue == null || dateValue == '' || dateValue == '-') {
+      return '-';
+    }
+
+    // 2) catch the default zero‐date string
+    if (dateValue is String && dateValue.startsWith('0001-01-01')) {
+      return '-';
+    }
+    // 3) catch a parsed DateTime of year 1
+    if (dateValue is DateTime && dateValue.year == 1) {
+      return '-';
+    }
+    // 4) catch a map with seconds == 0
+    if (dateValue is Map) {
+      final seconds = dateValue['seconds'];
+      if (seconds != null) {
+        final dt = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+        if (dt.year == 1) return '-';
+      }
+    }
+
     try {
       DateTime date;
-      if (dateValue is Map && dateValue.containsKey('seconds')) {
-        // Handle Firestore Timestamp format from JSON 
-        final seconds = dateValue['seconds'];
-        date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
-      } else if (dateValue is DateTime) {
-        date = dateValue;
-      } else if (dateValue is String) {
+      developer.log("Formatting date value type: ${dateValue.runtimeType}, value: $dateValue");
+
+      if (dateValue is String) {
         date = DateTime.parse(dateValue);
-      } else if (dateValue.toString().contains('Timestamp')) {
-        // Parse the string representation of Timestamp
-        final regex = RegExp(r'Timestamp\(seconds=(\d+),');
-        final match = regex.firstMatch(dateValue.toString());
-        if (match != null && match.groupCount >= 1) {
-          final seconds = int.parse(match.group(1)!);
+      } else if (dateValue is Map) {
+        final seconds = dateValue['seconds'];
+        if (seconds != null) {
           date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
         } else {
           return dateValue.toString();
         }
+      } else if (dateValue is DateTime) {
+        date = dateValue;
       } else {
         return dateValue.toString();
       }
-      
+
       final localTime = date.toLocal();
-      final hour = localTime.hour > 12 ? localTime.hour - 12 : (localTime.hour == 0 ? 12 : localTime.hour);
+      final hour = localTime.hour % 12 == 0 ? 12 : localTime.hour % 12;
       final ampm = localTime.hour >= 12 ? 'pm' : 'am';
       return "${hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')} $ampm, "
-             "${DateFormat('dd MMM yyyy').format(localTime)}";
+          "${localTime.day} ${_getMonthName(localTime.month)}";
     } catch (e) {
       developer.log('Error formatting date: $e for value $dateValue');
       return dateValue.toString();
     }
+  }
+
+  // Helper function to get month name
+  String _getMonthName(int month) {
+    return [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ][month];
   }
 }

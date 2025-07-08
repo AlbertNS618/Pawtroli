@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pawtroli/design_constant.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/pet_update_model.dart';
 import '../../services/pet_update_service.dart';
 
@@ -11,14 +16,47 @@ class PetUpdatesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B2341),
+        backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
+        toolbarHeight: 85, // Set exact height of AppBar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Activity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Activity',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
+        actions: [
+          StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
+            builder: (ctx, userSnap) {
+              if (userSnap.hasData &&
+                  (userSnap.data!.data() as Map<String, dynamic>)['role'] ==
+                      'admin') {
+                return IconButton(
+                  icon: Image.asset(
+                    'assets/images/upload.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/pet_update_upload',
+                      arguments: {'petId': petId}, // Replace with actual pet name
+                    );
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<PetUpdateModel>>(
         future: PetUpdateService().getPetUpdates(petId),
@@ -56,64 +94,87 @@ class PetUpdatesScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(left: 12, top: 12),
                           child: Text(
-                            'staff',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                            'Staff',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(right: 12, top: 12),
                           child: Text(
-                            update.time,
-                            style: const TextStyle(color: Colors.black54, fontSize: 13),
+                            DateFormat('dd MMM yyyy, h:mm a')
+                                .format(update.timestamp),
+                            style: const TextStyle(
+                                color: Colors.black54, fontSize: 13),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: update.imageUrl.isNotEmpty
-                          ? Image.network(update.imageUrl, height: 180, width: double.infinity, fit: BoxFit.cover)
-                          : Container(height: 180, color: Colors.grey[200]),
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: (update.imageUrl.isEmpty)
+                              ? const AssetImage('assets/images/pet_activity.png')
+                              : NetworkImage(update.imageUrl) as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                          onPressed: () {
+                            // Delete functionality would go here
+                          },
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey[400]!),
-                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Center(
-                                child: Text(
-                                  update.caption,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 6.0, horizontal: 6.0),
+                              child: Text(
+                                update.caption,
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ), 
                               ),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.download, color: Colors.black54),
-                            onPressed: () {
-                              PetUpdateService().downloadUpdate(update);
-                            },
-                          ),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.download_outlined, color: Colors.grey),
+                          onPressed: () {
+                            // Download functionality would go here
+                          },
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Description:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text(update.description, style: const TextStyle(fontSize: 13)),
+                          const Text('Description:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          Text(update.description, style: const TextStyle(fontSize: 14)),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               );

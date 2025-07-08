@@ -22,74 +22,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Remove this:
-    // goToChat(context);
-  }
-
-  // Future<void> goToChat(BuildContext context) async {
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   if (user != null) {
-  //     final adminQuery = await FirebaseFirestore.instance
-  //         .collection("users")
-  //         .where("role", isEqualTo: "admin")
-  //         .limit(1)
-  //         .get();
-
-  //     final adminIdValue = adminQuery.docs.isNotEmpty ? adminQuery.docs.first.id : 'defaultAdminId';
-  //     final chatQuery = await FirebaseFirestore.instance
-  //         .collection('chats')
-  //         .where('users', arrayContains: user.uid)
-  //         .get();
-
-  //     QueryDocumentSnapshot<Map<String, dynamic>>? chatDoc;
-  //     try {
-  //       chatDoc = chatQuery.docs.firstWhere(
-  //         (doc) {
-  //           final users = List<String>.from(doc['users']);
-  //           return users.contains(adminIdValue);
-  //         },
-  //       );
-  //     } catch (e) {
-  //       chatDoc = null;
-  //     }
-
-  //     final chatIdValue = chatDoc != null ? chatDoc.id : 'defaultChatId';
-  //     developer.log("Chat ID: $chatIdValue");
-  //     developer.log("Admin ID: $adminIdValue");
-
-  //     setState(() {
-  //       adminId = adminIdValue;
-  //       chatId = chatIdValue;
-  //     });
-
-
-  //     // Add this to navigate after fetching
-  //     Navigator.pushNamed(
-  //       context,
-  //       '/chat',
-  //       arguments: {
-  //         'chatId': chatIdValue,
-  //         'adminId': adminIdValue,
-  //       },
-  //     );
-  //   }
-  // }
-
-  Color getStatusBoxColor() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 12) {
-      // Morning
-      return Colors.lightBlue.shade300;
-    } else if (hour >= 12 && hour < 17) {
-      // Afternoon
-      return Colors.orange.shade400;
-    } else if (hour >= 17 && hour < 21) {
-      // Evening
-      return Colors.deepPurple.shade300;
-    } else {
-      // Night
-      return Colors.blue.shade900;
-    }
   }
 
   @override
@@ -122,7 +54,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: const Size.fromHeight(90),
         child: Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF0B2341),
+            color: DesignConstant.pawBlue,
           ),
           child: SafeArea(
             child: Padding(
@@ -171,10 +103,6 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Colors.white),
-                    onPressed: () {},
-                  ),
                 ],
               ),
             ),
@@ -201,6 +129,7 @@ class _HomePageState extends State<HomePage> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search Your Pet..',
+                  hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold),
                   prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -281,7 +210,7 @@ class _HomePageState extends State<HomePage> {
                       itemBuilder: (context, index) {
                         final pet = pets[index].data() as Map<String, dynamic>;
                         final isActive = pet['active'] == true;
-                        final statusText = isActive ? (pet['status'] ?? '-') : 'Not currently in our care';
+                        final statusText = isActive ? pet['status'] : 'Not currently in our care';
                         return GestureDetector(
                           onTap: () {
                             Navigator.pushReplacementNamed(context, '/pet_profile', arguments: pets[index].id);
@@ -323,10 +252,10 @@ class _HomePageState extends State<HomePage> {
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: isActive ? getStatusBoxColor() : const Color(0xFFE6F0FA),
+                                    color: isActive ? DesignConstant.pawBlue : const Color(0xFFE6F0FA),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: isActive ? Colors.transparent : const Color(0xFF0B2341),
+                                      color: isActive ? Colors.transparent : DesignConstant.pawBlue,
                                       width: 0.5,
                                     ),
                                   ),
@@ -335,14 +264,14 @@ class _HomePageState extends State<HomePage> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       if (!isActive)
-                                        Icon(Icons.info, color: const Color(0xFF0B2341), size: 20),
+                                        Icon(Icons.info, color: DesignConstant.pawBlue, size: 20),
                                       if (!isActive)
                                         const SizedBox(width: 8),
                                       Flexible(
                                         child: Text(
-                                          statusText,
+                                          statusText.toString(),
                                           style: TextStyle(
-                                            color: isActive ? Colors.white : const Color(0xFF0B2341),
+                                            color: isActive ? Colors.white : DesignConstant.pawBlue,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 15,
                                           ),
@@ -368,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                       itemBuilder: (context, index) {
                         final pet = pets[index].data() as Map<String, dynamic>;
                         final isActive = pet['active'] == true;
-                        final statusText = isActive ? (pet['status'] ?? '-') : 'Not currently in our care';
+                        final statusText = isActive ? pet['status'] : 'Not currently in our care';
                         return GestureDetector(
                           onTap: () {
                             Navigator.pushReplacementNamed(context, '/pet_profile', arguments: pets[index].id);
@@ -411,11 +340,11 @@ class _HomePageState extends State<HomePage> {
                                           ? Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: getStatusBoxColor(),
+                                                color: DesignConstant.pawBlue,
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                statusText,
+                                                statusText.toString(),
                                                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                               ),
                                             )
@@ -425,18 +354,18 @@ class _HomePageState extends State<HomePage> {
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFFE6F0FA),
                                                 borderRadius: BorderRadius.circular(10),
-                                                border: Border.all(color: const Color(0xFF0B2341), width: 0.5),
+                                                border: Border.all(color: DesignConstant.pawBlue, width: 0.5),
                                               ),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Icon(Icons.info, color: Color(0xFF0B2341), size: 20),
+                                                  Icon(Icons.info, color: DesignConstant.pawBlue, size: 20),
                                                   const SizedBox(width: 8),
                                                   Expanded(
                                                     child: Text(
-                                                      statusText,
+                                                      statusText.toString(),
                                                       style: const TextStyle(
-                                                        color: Color(0xFF0B2341),
+                                                        color: DesignConstant.pawBlue,
                                                         fontWeight: FontWeight.w500,
                                                         fontSize: 15,
                                                       ),
@@ -461,6 +390,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
+            const SizedBox(height: 20),
             Center(
               child: SizedBox(
               width: 180,
@@ -468,8 +398,8 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                 Navigator.pushNamed(context, '/pet_registration');
                 },
-                icon: const Icon(Icons.add),
-                label: const Text('Add Pet'),
+                icon: const Icon(Icons.add, size: 25),
+                label: const Text('Add Pet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                 style: ElevatedButton.styleFrom(
                 backgroundColor: DesignConstant.pawBlue,
                 foregroundColor: Colors.white,
@@ -493,7 +423,6 @@ class _HomePageState extends State<HomePage> {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/home');
           } else if (index == 1) {
-            // print("heLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoo");
             goToChat(context); // Only call here!
           } else if (index == 2) {
             Navigator.pushNamed(context, '/cctv');
