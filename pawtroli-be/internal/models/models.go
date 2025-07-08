@@ -7,32 +7,35 @@ type User struct {
 	Name      string    `firestore:"name"`
 	Email     string    `firestore:"email"`
 	Phone     string    `firestore:"phone"`
-	Role	  string    `firestore:"role"` // "user" or "admin"
+	Role      string    `firestore:"role"` // "user" or "admin"
 	CreatedAt time.Time `firestore:"createdAt"`
 }
 
 type Pet struct {
-	ID        string    `firestore:"-"` // use for document ID
-	Name      string    `firestore:"name"`
-	Type      string    `firestore:"type"`
-	Gender    string    `firestore:"gender"`
-	Age       int    	`firestore:"age"`
-	Color     string    `firestore:"color"`
-	Allergy   string    `firestore:"allergy"`
-	Other     string    `firestore:"other"`
-	OwnerID   string    `firestore:"ownerId"`
-	ImageURL  string    `firestore:"imageUrl"`
-	CheckIn   time.Time `firestore:"checkIn"`
-	CheckOut  time.Time `firestore:"checkOut"`
-	CreatedAt time.Time `firestore:"createdAt"`
+	PetID     string    `json:"petId" firestore:"petId"` // <-- store PetID in a petId field
+	Name      string    `json:"name" firestore:"name"`
+	Type      string    `json:"type" firestore:"type"`
+	Gender    string    `json:"gender" firestore:"gender"`
+	Age       int       `json:"age" firestore:"age"`
+	Color     string    `json:"color" firestore:"color"`
+	Allergy   string    `json:"allergy" firestore:"allergy"`
+	Other     string    `json:"other" firestore:"other"`
+	OwnerID   string    `json:"ownerId" firestore:"ownerId"`
+	ImageURL  string    `json:"imageUrl" firestore:"imageUrl"`
+	Active    bool      `json:"active" firestore:"active"`
+	Status    string    `json:"status" firestore:"status"`
+	CheckIn   time.Time `json:"checkIn" firestore:"checkIn"`
+	CheckOut  time.Time `json:"checkOut" firestore:"checkOut"`
+	CreatedAt time.Time `json:"createdAt" firestore:"createdAt"`
 }
 
 type PetUpdate struct {
-	ID        string    `firestore:"-"` // use for document ID
-	Caption   string    `firestore:"caption"`
-	Description string  `firestore:"description"`
-	ImageURL  string    `firestore:"imageUrl"`
-	Timestamp time.Time `firestore:"timestamp"`
+	ID          string    `json:"id" firestore:"-"`
+	Caption     string    `json:"caption" firestore:"caption"`
+	Description string    `json:"description" firestore:"description"`
+	ImageURL    string    `json:"imageUrl" firestore:"imageUrl"`
+	PetID       string    `json:"petId" firestore:"petId"` // already stored
+	Timestamp   time.Time `json:"timestamp" firestore:"timestamp"`
 }
 
 type ChatRoom struct {

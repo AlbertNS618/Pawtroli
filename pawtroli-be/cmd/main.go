@@ -17,19 +17,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func registerAdminRoutes(r *mux.Router) {
+func AdminRoutes(r *mux.Router) {
 	admin := r.PathPrefix("/admin").Subrouter()
 	admin.HandleFunc("/logs", api.GetLogFiles).Methods("GET")
 }
 
-func registerPetRoutes(r *mux.Router) {
+func PetRoutes(r *mux.Router) {
 	pets := r.PathPrefix("/pets").Subrouter()
+	pets.HandleFunc("/{id}", api.GetPet).Methods("GET")
 	pets.HandleFunc("", api.CreatePet).Methods("POST")
+	pets.HandleFunc("/{petId}/activate", api.ActivatePet).Methods("PATCH")
 	pets.HandleFunc("/{petId}/updates", api.CreatePetUpdate).Methods("POST")
 	pets.HandleFunc("/{petId}/updates", api.GetPetUpdates).Methods("GET")
-}
+	pets.HandleFunc("/{petId}/delete", api.DeletePet).Methods("DELETE")
+}            
 
-func registerChatRoutes(r *mux.Router) {
+func ChatRoutes(r *mux.Router) {
 	chats := r.PathPrefix("/chats").Subrouter()
 	chats.HandleFunc("", api.CreateChatRoom).Methods("POST")
 	chats.HandleFunc("/{roomId}/messages", api.SendMessage).Methods("POST")
@@ -75,9 +78,9 @@ func main() {
 
 	// Routes
 	r.HandleFunc("/register", api.HandleUserRegister).Methods("POST")
-	registerPetRoutes(r)
-	registerChatRoutes(r)
-	registerAdminRoutes(r)
+	PetRoutes(r)
+	ChatRoutes(r)
+	AdminRoutes(r)
 	r.Handle("/login", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
 
 	logger.LogInfo("🚀 Server running on :8080")
