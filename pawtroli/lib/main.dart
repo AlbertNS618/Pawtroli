@@ -51,6 +51,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textTheme: GoogleFonts.comicNeueTextTheme(),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
       initialRoute: '/signin',
       routes: {
@@ -126,8 +132,10 @@ class MyApp extends StatelessWidget {
             ),
           );
         }
+
         return null; // fallback if route not recognized
       },
+      
     );
   }
 }
@@ -187,19 +195,7 @@ class _EntryState extends State<Entry> {
         },
       );
     }
-
-    // If user just registered, proceed to pet registration
-    if (userId != null) {
-      return PetRegistrationScreen(userId: userId!);
-    }
-
-    // Decide between Sign In and Register
-    if (!showLogin) {
-      return RegisterScreen(
-        onRegister: handleRegister,
-        onSigninTap: () => setState(() => showLogin = true),
-      );
-    }
+    
     return SignInScreen(
       onRegisterTap: () => setState(() => showLogin = false),
       onSignInSuccess: handleSignIn,

@@ -17,6 +17,7 @@ class PetUpdateService {
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
+        print(data);
         return data.map((j) => PetUpdateModel.fromJson(j)).toList();
       } else {
         throw Exception(

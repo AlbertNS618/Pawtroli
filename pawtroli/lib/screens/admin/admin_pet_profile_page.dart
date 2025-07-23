@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:pawtroli/widgets/info_card.dart';
 import '../../models/pet_model.dart';
 import '../../services/pet_service.dart'; // Import the PetService
-import '../pet/pet_updates_screen.dart';
 import '../../models/user_model.dart';
 import '../../services/user_service.dart';
 
@@ -26,7 +25,7 @@ class AdminPetProfilePage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/admin_home'),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
@@ -150,11 +149,10 @@ class AdminPetProfilePage extends StatelessWidget {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => PetUpdatesScreen(petId: petId),
-                        ),
+                        '/pet_updates',
+                        arguments: petId,
                       );
                     },
                     style: ElevatedButton.styleFrom(

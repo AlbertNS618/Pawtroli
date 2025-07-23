@@ -178,7 +178,7 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Update posted successfully!')),
                       );
-                      Navigator.pushNamed(context, '/pet_updates', arguments: widget.petId);
+                      Navigator.pop(context);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to post update.')),

@@ -104,7 +104,7 @@ class PetUpdatesScreen extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 12, top: 12),
                           child: Text(
                             DateFormat('dd MMM yyyy, h:mm a')
-                                .format(update.timestamp),
+                                .format(update.timestamp.toLocal()),
                             style: const TextStyle(
                                 color: Colors.black54, fontSize: 13),
                           ),
@@ -117,7 +117,7 @@ class PetUpdatesScreen extends StatelessWidget {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: (update.imageUrl.isEmpty)
+                          image: (update.imageUrl.isEmpty || update.imageUrl == 'placeholder_for_image_url')
                               ? const AssetImage('assets/images/pet_activity.png')
                               : NetworkImage(update.imageUrl) as ImageProvider,
                           fit: BoxFit.cover,
