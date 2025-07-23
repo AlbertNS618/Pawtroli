@@ -1,6 +1,6 @@
 # Pawtroli - Pet Hotel Management System
 
-![Pawtroli Logo](assets/logo.png)
+![logo](https://github.com/user-attachments/assets/df30547c-f928-450d-9554-eecffa9d035b)
 
 ## Overview
 
