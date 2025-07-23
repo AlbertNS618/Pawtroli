@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"pawtroli-be/internal/logger"
+	"pawtroli-be/internal/middleware"
 	"pawtroli-be/internal/models"
 
 	"cloud.google.com/go/firestore"
@@ -15,7 +16,7 @@ import (
 
 func UserRoutes(r *mux.Router) {
 	r.HandleFunc("/register", UserRegister).Methods("POST")
-	r.HandleFunc("/login", UserLogin).Methods("POST")
+	r.Handle("/login", middleware.VerifyToken(http.HandlerFunc(UserLogin))).Methods("POST")
 }
 
 // GET /register
