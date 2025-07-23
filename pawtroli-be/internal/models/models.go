@@ -51,3 +51,11 @@ type Message struct {
 	Content   string    `firestore:"content"`
 	Timestamp time.Time `firestore:"timestamp"`
 }
+
+type MessageResponse struct {
+	ID        string `json:"id"`
+	Content   string `json:"content"`
+	SenderID  string `json:"senderId"`
+	RoomID    string `json:"roomId"`
+	Timestamp string `json:"timestamp"`
+}

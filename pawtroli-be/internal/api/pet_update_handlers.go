@@ -61,6 +61,7 @@ func CreatePetUpdate(w http.ResponseWriter, r *http.Request) {
 func GetPetUpdates(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	petId := mux.Vars(r)["petId"]
+	loc, _ := time.LoadLocation("Asia/Jakarta") // UTC+7
 	logger.LogInfof("GetPetUpdates called for petId: %s", petId)
 
 	ctx := context.Background()
@@ -84,6 +85,7 @@ func GetPetUpdates(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		update.ID = doc.Ref.ID
+		update.Timestamp = update.Timestamp.In(loc) // Convert to UTC+7 as time.Time
 		updates = append(updates, update)
 		logger.LogInfof("Fetched update: %+v", update)
 	}

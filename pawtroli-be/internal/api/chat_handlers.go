@@ -90,13 +90,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(msg)
 }
 
-type MessageResponse struct {
-	ID        string `json:"id"`
-	Content   string `json:"content"`
-	SenderID  string `json:"senderId"`
-	RoomID    string `json:"roomId"`
-	Timestamp string `json:"timestamp"`
-}
+
 
 // GET /chats/{roomId}/messages
 func GetMessages(w http.ResponseWriter, r *http.Request) {
@@ -115,13 +109,13 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 
 	loc, _ := time.LoadLocation("Asia/Jakarta") // UTC+7
 
-	var messages []MessageResponse
+	var messages []models.MessageResponse
 	for _, doc := range docs {
 		m := new(models.Message)
 		doc.DataTo(m)
 		m.ID = doc.Ref.ID
 		// Convert timestamp to UTC+7 before formatting
-		messages = append(messages, MessageResponse{
+		messages = append(messages, models.MessageResponse{
 			ID:        m.ID,
 			Content:   m.Content,
 			SenderID:  m.SenderID,
