@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
 	"time"
 
@@ -10,6 +11,11 @@ import (
 )
 
 var logRotationService *services.LogRotationService
+
+func AdminRoutes(r *mux.Router) {
+	admin := r.PathPrefix("/admin").Subrouter()
+	admin.HandleFunc("/logs", GetLogFiles).Methods("GET")
+}
 
 // SetLogRotationService sets the log rotation service for the handlers
 func SetLogRotationService(lrs *services.LogRotationService) {

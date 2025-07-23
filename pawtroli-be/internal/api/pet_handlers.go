@@ -14,12 +14,23 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func PetRoutes(r *mux.Router) {
+	pets := r.PathPrefix("/pets").Subrouter()
+	pets.HandleFunc("/{id}", GetPet).Methods("GET")
+	pets.HandleFunc("", CreatePet).Methods("POST")
+	pets.HandleFunc("/{petId}/activate", ActivatePet).Methods("PATCH")
+	pets.HandleFunc("/{petId}/updates", CreatePetUpdate).Methods("POST")
+	pets.HandleFunc("/{petId}/updates", GetPetUpdates).Methods("GET")
+	pets.HandleFunc("/{petId}/delete", DeletePet).Methods("DELETE")
+}
+
 // POST /pets
 func CreatePet(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	logger.LogInfo("CreatePet called")
 
 	pet := new(models.Pet)
+
 	if err := json.NewDecoder(r.Body).Decode(pet); err != nil {
 		logger.LogErrorf("Failed to decode pet: %v", err)
 		http.Error(w, "Invalid body", http.StatusBadRequest)
@@ -104,6 +115,7 @@ func ActivatePet(w http.ResponseWriter, r *http.Request) {
 		CheckIn  string `json:"checkIn"`
 		CheckOut string `json:"checkOut"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.LogErrorf("Failed to decode ActivatePet body: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)

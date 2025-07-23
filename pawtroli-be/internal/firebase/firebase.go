@@ -1,6 +1,7 @@
 package firebase
 
 import (
+	"cloud.google.com/go/firestore"
 	"context"
 
 	"pawtroli-be/internal/logger"
@@ -21,4 +22,17 @@ func InitFirebase() {
 	}
 	App = app
 	logger.LogInfo("Firebase initialized successfully.")
+}
+
+var firestoreClient *firestore.Client
+
+func InitHandlers() {
+	ctx := context.Background()
+	client, err := App.Firestore(ctx)
+	if err != nil {
+		logger.LogErrorf("❌ Failed to init Firestore: %v", err)
+		panic(err)
+	}
+	firestoreClient = client
+	logger.LogInfo("✅ Firestore client initialized")
 }

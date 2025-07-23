@@ -13,31 +13,8 @@ import (
 	"pawtroli-be/internal/middleware"
 	"pawtroli-be/internal/services"
 
-	// "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
-
-func AdminRoutes(r *mux.Router) {
-	admin := r.PathPrefix("/admin").Subrouter()
-	admin.HandleFunc("/logs", api.GetLogFiles).Methods("GET")
-}
-
-func PetRoutes(r *mux.Router) {
-	pets := r.PathPrefix("/pets").Subrouter()
-	pets.HandleFunc("/{id}", api.GetPet).Methods("GET")
-	pets.HandleFunc("", api.CreatePet).Methods("POST")
-	pets.HandleFunc("/{petId}/activate", api.ActivatePet).Methods("PATCH")
-	pets.HandleFunc("/{petId}/updates", api.CreatePetUpdate).Methods("POST")
-	pets.HandleFunc("/{petId}/updates", api.GetPetUpdates).Methods("GET")
-	pets.HandleFunc("/{petId}/delete", api.DeletePet).Methods("DELETE")
-}            
-
-func ChatRoutes(r *mux.Router) {
-	chats := r.PathPrefix("/chats").Subrouter()
-	chats.HandleFunc("", api.CreateChatRoom).Methods("POST")
-	chats.HandleFunc("/{roomId}/messages", api.SendMessage).Methods("POST")
-	chats.HandleFunc("/{roomId}/messages", api.GetMessages).Methods("GET")
-}
 
 func main() {
 	// Initialize logger first
@@ -77,16 +54,15 @@ func main() {
 	r.Use(middleware.LoggingMiddleware)
 
 	// Routes
-	r.HandleFunc("/register", api.HandleUserRegister).Methods("POST")
-	PetRoutes(r)
-	ChatRoutes(r)
-	AdminRoutes(r)
-	r.Handle("/login", middleware.VerifyToken(http.HandlerFunc(api.SecureEndpointHandler))).Methods("POST")
+	api.UserRoutes(r)
+	api.PetRoutes(r)
+	api.ChatRoutes(r)
+	api.AdminRoutes(r)
 
 	logger.LogInfo("🚀 Server running on :8080")
 	err := http.ListenAndServe("0.0.0.0:8080", r)
 	if err != nil {
-		 logger.LogErrorf("Server failed: %v", err)
+		logger.LogErrorf("Server failed: %v", err)
 		return
 	}
 }

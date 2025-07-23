@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"pawtroli-be/internal/firebase"
 	"pawtroli-be/internal/logger"
 	"pawtroli-be/internal/models"
 
@@ -14,17 +13,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var firestoreClient *firestore.Client
-
-func InitHandlers() {
-	ctx := context.Background()
-	client, err := firebase.App.Firestore(ctx)
-	if err != nil {
-		logger.LogErrorf("❌ Failed to init Firestore: %v", err)
-		panic(err)
-	}
-	firestoreClient = client
-	logger.LogInfo("✅ Firestore client initialized")
+func ChatRoutes(r *mux.Router) {
+	chats := r.PathPrefix("/chats").Subrouter()
+	chats.HandleFunc("", CreateChatRoom).Methods("POST")
+	chats.HandleFunc("/{roomId}/messages", SendMessage).Methods("POST")
+	chats.HandleFunc("/{roomId}/messages", GetMessages).Methods("GET")
 }
 
 // POST /chats/{roomId}

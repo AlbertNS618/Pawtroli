@@ -10,12 +10,18 @@ import (
 	"pawtroli-be/internal/models"
 
 	"cloud.google.com/go/firestore"
+	"github.com/gorilla/mux"
 )
 
+func UserRoutes(r *mux.Router) {
+	r.HandleFunc("/register", UserRegister).Methods("POST")
+	r.HandleFunc("/login", UserLogin).Methods("POST")
+}
+
 // GET /register
-func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
+func UserRegister(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	logger.LogInfo("HandleUserRegister called")
+	logger.LogInfo("UserRegister called")
 
 	user := new(models.User)
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
@@ -50,10 +56,10 @@ func HandleUserRegister(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
-// SecureEndpointHandler handles authenticated requests to /login
-func SecureEndpointHandler(w http.ResponseWriter, r *http.Request) {
+// UserLogin handles authenticated requests to /login
+func UserLogin(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	logger.LogInfof("SecureEndpointHandler called: method=%s, url=%s, remoteAddr=%s",
+	logger.LogInfof("UserLogin called: method=%s, url=%s, remoteAddr=%s",
 		r.Method, r.URL.Path, r.RemoteAddr)
 
 	uid, ok := r.Context().Value("uid").(string)
