@@ -6,6 +6,5 @@ class ApiConstants {
   static const String pets = "$baseUrl/pets";
   static const String feeds = "$baseUrl/feeds";
   static const String chats = "$baseUrl/chats";
-  static const String petUpdates = "$baseUrl/pet-updates"; // or your actual endpoint
   static const String messages = "$baseUrl/chats"; // Use as $messages/{roomId}/messages
 }

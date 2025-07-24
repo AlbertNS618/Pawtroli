@@ -7,9 +7,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/pet_update_model.dart';
 import '../../services/pet_update_service.dart';
 
-class PetUpdatesScreen extends StatelessWidget {
+class PetUpdatesScreen extends StatefulWidget {
   final String petId;
   const PetUpdatesScreen({super.key, required this.petId});
+
+  @override
+  State<PetUpdatesScreen> createState() => _PetUpdatesScreenState();
+}
+
+class _PetUpdatesScreenState extends State<PetUpdatesScreen> {
+  late Future<List<PetUpdateModel>> _updatesFuture;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadUpdates();
+  }
+  
+  void _loadUpdates() {
+    _updatesFuture = PetUpdateService().getPetUpdates(widget.petId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +65,13 @@ class PetUpdatesScreen extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/pet_update_upload',
-                      arguments: {'petId': petId}, // Replace with actual pet name
-                    );
+                      arguments: {'petId': widget.petId},
+                    ).then((_) {
+                      // Refresh after returning from upload screen
+                      setState(() {
+                        _loadUpdates();
+                      });
+                    });
                   },
                 );
               }
@@ -59,7 +81,7 @@ class PetUpdatesScreen extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<List<PetUpdateModel>>(
-        future: PetUpdateService().getPetUpdates(petId),
+        future: _updatesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -130,7 +152,20 @@ class PetUpdatesScreen extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.delete_outline, color: Colors.grey),
                           onPressed: () {
-                            // Delete functionality would go here
+                            PetUpdateService().deletePetUpdate(widget.petId, update.id).then((success) {
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Update deleted successfully')),
+                                );
+                                setState(() {
+                                  _loadUpdates(); // Refresh the updates list
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Failed to delete update')),
+                                );
+                              }
+                            });
                           },
                         ),
                         Expanded(

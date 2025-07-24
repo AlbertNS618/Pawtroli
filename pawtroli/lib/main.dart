@@ -39,7 +39,7 @@ Future<bool> _isUserAdmin(BuildContext context) async {
   return role == 'admin' ? true : false;
 }
 
-/// Main application widget.
+/// Main app
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
                 Navigator.of(context).pushReplacementNamed('/home', arguments: userId);
               },
               onSigninTap: () {
-                // when user taps “Sign in here”
+                // when user taps "Sign in here"
                 Navigator.of(context).pushNamed('/signin');
               },
             ),
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
                 }
               },
               onRegisterTap: () {
-                // when user taps “Register here”
+                // when user taps "Register here"
                 Navigator.of(context).pushNamed('/register');
               },
             ),
@@ -135,71 +135,6 @@ class MyApp extends StatelessWidget {
 
         return null; // fallback if route not recognized
       },
-      
     );
   }
 }
-
-/// Initial screen that decides where the user goes: sign in, register, or home/admin screens.
-class Entry extends StatefulWidget {
-  const Entry({super.key});
-
-  @override
-  State<Entry> createState() => _EntryState();
-}
-
-class _EntryState extends State<Entry> {
-  String? userId;
-  bool showLogin = true;
-  bool isSignedIn = false;
-
-  void handleSignIn() {
-    setState(() => isSignedIn = true);
-  }
-
-  void handleRegister(String id) {
-    setState(() {
-      userId = id;
-      showLogin = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // If user is signed in, decide if user is admin or normal user
-    if (isSignedIn) {
-      // Use a FutureBuilder to load the role from Firestore
-      return FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser?.uid)
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          // If doc doesn't exist or no data, default to user role
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const HomePage();
-          }
-
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final role = data['role'] ?? 'user';
-          if (role == 'admin') {
-            return const AdminHomePage();
-          } else {
-            return const HomePage();
-          }
-        },
-      );
-    }
-    
-    return SignInScreen(
-      onRegisterTap: () => setState(() => showLogin = false),
-      onSignInSuccess: handleSignIn,
-    );
-  }
-}
-

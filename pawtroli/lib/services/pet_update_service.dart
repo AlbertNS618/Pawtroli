@@ -56,6 +56,27 @@ class PetUpdateService {
     }
   }
 
+  Future<bool> deletePetUpdate(String petId, String updateId) async {
+    try {
+      final uri = Uri.parse('${ApiConstants.pets}/$petId/updates/$updateId');
+      final response = await http
+          .delete(uri)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to delete update (Status ${response.statusCode}): ${response.body}');
+      }
+      developer.log('Pet update deleted successfully');
+      return response.statusCode == 200;
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on TimeoutException {
+      throw Exception('Deleting update timed out');
+    } catch (e) {
+      throw Exception('Failed to delete pet update: $e');
+    }
+  }
+
   Future<void> downloadUpdate(PetUpdateModel update) async {
     if (update.imageUrl.isEmpty) return;
     try {
