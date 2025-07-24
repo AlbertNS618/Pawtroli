@@ -16,11 +16,9 @@ import (
 
 func PetRoutes(r *mux.Router) {
 	pets := r.PathPrefix("/pets").Subrouter()
-	pets.HandleFunc("/{id}", GetPet).Methods("GET")
 	pets.HandleFunc("", CreatePet).Methods("POST")
+	pets.HandleFunc("/{id}", GetPet).Methods("GET")
 	pets.HandleFunc("/{petId}/activate", ActivatePet).Methods("PATCH")
-	pets.HandleFunc("/{petId}/updates", CreatePetUpdate).Methods("POST")
-	pets.HandleFunc("/{petId}/updates", GetPetUpdates).Methods("GET")
 	pets.HandleFunc("/{petId}/delete", DeletePet).Methods("DELETE")
 }
 

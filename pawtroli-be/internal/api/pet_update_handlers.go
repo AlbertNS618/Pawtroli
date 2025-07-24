@@ -14,6 +14,13 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+func PetUpdateRoutes(r *mux.Router) {
+	pets := r.PathPrefix("/pets").Subrouter()
+	pets.HandleFunc("/{petId}/updates", CreatePetUpdate).Methods("POST")
+	pets.HandleFunc("/{petId}/updates", GetPetUpdates).Methods("GET")
+	pets.HandleFunc("/{petId}/updates/{updateId}", DeletePetUpdate).Methods("DELETE")
+}
+
 // POST /pets/{petId}/updates
 func CreatePetUpdate(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -93,4 +100,26 @@ func GetPetUpdates(w http.ResponseWriter, r *http.Request) {
 	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updates)
+}
+
+func DeletePetUpdate(w http.ResponseWriter, r *http.Request){
+	start := time.Now()
+	petId := mux.Vars(r)["petId"]
+	updateId := mux.Vars(r)["updateId"]
+	logger.LogInfof("DeletePetUpdate called for petId: %s, updateId: %s", petId, updateId)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := firestoreClient.Collection("pet_updates").Doc(updateId).Delete(ctx)
+	if err != nil {
+		logger.LogErrorf("Failed to delete pet update: %v", err)
+		http.Error(w, "Failed to delete update", http.StatusInternalServerError)
+		return
+	}
+
+	logger.LogInfof("Pet update deleted successfully for petId: %s, updateId: %s", petId, updateId)
+	logger.LogFirestoreOperation("DELETE", "pet_updates", updateId, true, time.Since(start))
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
+	(w).WriteHeader(http.StatusOK)
 }

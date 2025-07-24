@@ -56,6 +56,7 @@ func main() {
 	// Routes
 	api.UserRoutes(r)
 	api.PetRoutes(r)
+	api.PetUpdateRoutes(r)
 	api.ChatRoutes(r)
 	api.AdminRoutes(r)
 
