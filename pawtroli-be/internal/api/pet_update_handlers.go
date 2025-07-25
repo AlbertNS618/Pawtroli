@@ -123,3 +123,40 @@ func DeletePetUpdate(w http.ResponseWriter, r *http.Request){
 	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
 	(w).WriteHeader(http.StatusOK)
 }
+
+func DownloadPetUpdate(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	petId := mux.Vars(r)["petId"]
+	logger.LogInfof("DownloadPetUpdate called for petId: %s", petId)
+
+	ctx := context.Background()
+	iter := firestoreClient.Collection("pet_updates").Where("petId", "==", petId).Documents(ctx)
+	defer iter.Stop()
+
+	var updates []models.PetUpdate
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			logger.LogErrorf("Error fetching pet updates: %v", err)
+			http.Error(w, "Failed to fetch updates", http.StatusInternalServerError)
+			return
+		}
+		var update models.PetUpdate
+		if err := doc.DataTo(&update); err != nil {
+			logger.LogErrorf("Error decoding pet update: %v", err)
+			continue
+		}
+		update.ID = doc.Ref.ID
+		updates = append(updates, update)
+		logger.LogInfof("Fetched update: %+v", update)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updates)
+
+	logger.LogInfof("Downloaded %d updates for petId: %s", len(updates), petId)
+	logger.LogHTTPRequest(r.Method, r.URL.Path, r.RemoteAddr, http.StatusOK, time.Since(start))
+}
