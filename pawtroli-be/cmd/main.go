@@ -5,13 +5,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"pawtroli-be/internal/api"
 	"pawtroli-be/internal/firebase"
 	"pawtroli-be/internal/logger"
 	"pawtroli-be/internal/middleware"
-	"pawtroli-be/internal/services"
 
 	"github.com/gorilla/mux"
 )
@@ -23,19 +21,12 @@ func main() {
 	}
 	defer logger.CloseLogger()
 
-	// Initialize log rotation service
-	// Keep logs for 30 days, maximum 50 files
-	logRotationService := services.NewLogRotationService("logs", 50, 30*24*time.Hour)
-	logRotationService.Start()
-	defer logRotationService.Stop()
-
 	// Setup graceful shutdown
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		logger.LogInfo("Shutting down server...")
-		logRotationService.Stop()
 		logger.CloseLogger()
 		os.Exit(0)
 	}()
@@ -44,9 +35,6 @@ func main() {
 
 	firebase.InitFirebase()
 	api.InitHandlers()
-
-	// Pass log rotation service to API handlers
-	api.SetLogRotationService(logRotationService)
 
 	r := mux.NewRouter()
 
@@ -58,7 +46,8 @@ func main() {
 	api.PetRoutes(r)
 	api.PetUpdateRoutes(r)
 	api.ChatRoutes(r)
-	api.AdminRoutes(r)
+	// Remove or modify AdminRoutes that used log rotation service
+	// api.AdminRoutes(r)
 
 	logger.LogInfo("🚀 Server running on :8080")
 	err := http.ListenAndServe("0.0.0.0:8080", r)

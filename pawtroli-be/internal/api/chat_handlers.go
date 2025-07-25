@@ -15,7 +15,7 @@ import (
 
 func ChatRoutes(r *mux.Router) {
 	chats := r.PathPrefix("/chats").Subrouter()
-	chats.HandleFunc("", CreateChatRoom).Methods("POST")
+	chats.HandleFunc("/{roomId}", CreateChatRoom).Methods("POST")
 	chats.HandleFunc("/{roomId}/messages", SendMessage).Methods("POST")
 	chats.HandleFunc("/{roomId}/messages", GetMessages).Methods("GET")
 }

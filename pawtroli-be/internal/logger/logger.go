@@ -2,11 +2,8 @@ package logger
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"time"
 )
 
 var (
@@ -14,7 +11,6 @@ var (
 	ErrorLogger   *log.Logger
 	WarningLogger *log.Logger
 	DebugLogger   *log.Logger
-	logFile       *os.File
 )
 
 // LogLevel represents different log levels
@@ -27,36 +23,13 @@ const (
 	ERROR
 )
 
-// InitLogger initializes the logging system with file and console output
+// InitLogger initializes the logging system with console output only
 func InitLogger() error {
-	// Create log directory if it doesn't exist
-	logDir := "logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		return fmt.Errorf("failed to create log directory: %v", err)
-	}
-
-	// Create log filename with current date
-	logFileName := fmt.Sprintf("pawtroli_%s.log", time.Now().Format("2006-01-02"))
-	logFilePath := filepath.Join(logDir, logFileName)
-
-	// Open log file for writing (create if not exists, append if exists)
-	var err error
-	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return fmt.Errorf("failed to open log file: %v", err)
-	}
-
-	// Create multi-writers to write to both file and console
-	infoWriter := io.MultiWriter(os.Stdout, logFile)
-	errorWriter := io.MultiWriter(os.Stderr, logFile)
-	warningWriter := io.MultiWriter(os.Stdout, logFile)
-	debugWriter := io.MultiWriter(os.Stdout, logFile)
-
 	// Initialize loggers with different prefixes and flags
-	InfoLogger = log.New(infoWriter, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(errorWriter, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
-	WarningLogger = log.New(warningWriter, "[WARNING] ", log.Ldate|log.Ltime|log.Lshortfile)
-	DebugLogger = log.New(debugWriter, "[DEBUG] ", log.Ldate|log.Ltime|log.Lshortfile)
+	InfoLogger = log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(os.Stdout, "[WARNING] ", log.Ldate|log.Ltime|log.Lshortfile)
+	DebugLogger = log.New(os.Stdout, "[DEBUG] ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	InfoLogger.Println("Logger initialized successfully")
 	return nil
@@ -119,13 +92,13 @@ func LogDebugf(format string, v ...interface{}) {
 }
 
 // LogHTTPRequest logs HTTP request details
-func LogHTTPRequest(method, path, remoteAddr string, statusCode int, duration time.Duration) {
+func LogHTTPRequest(method, path, remoteAddr string, statusCode int, duration fmt.Stringer) {
 	LogInfof("HTTP %s %s from %s - Status: %d - Duration: %v",
 		method, path, remoteAddr, statusCode, duration)
 }
 
 // LogFirestoreOperation logs Firestore operation details
-func LogFirestoreOperation(operation, collection, docID string, success bool, duration time.Duration) {
+func LogFirestoreOperation(operation, collection, docID string, success bool, duration fmt.Stringer) {
 	if success {
 		LogInfof("Firestore %s operation on %s/%s successful - Duration: %v",
 			operation, collection, docID, duration)
@@ -144,22 +117,12 @@ func LogAuthOperation(operation, uid string, success bool) {
 	}
 }
 
-// CloseLogger closes the log file
+// CloseLogger is now a no-op function since there are no files to close
 func CloseLogger() {
-	if logFile != nil {
-		logFile.Close()
-	}
+	// No operation needed
 }
 
-// RotateLogFile rotates the log file if it's a new day
+// RotateLogFile is now a no-op function since there are no log files
 func RotateLogFile() error {
-	newLogFileName := fmt.Sprintf("pawtroli_%s.log", time.Now().Format("2006-01-02"))
-	currentLogFileName := filepath.Base(logFile.Name())
-
-	if newLogFileName != currentLogFileName {
-		LogInfo("Rotating log file...")
-		CloseLogger()
-		return InitLogger()
-	}
 	return nil
 }
