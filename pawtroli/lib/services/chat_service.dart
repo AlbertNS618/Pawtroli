@@ -26,7 +26,7 @@ class ChatService {
 
   Future<bool> sendMessage(String roomId, String senderId, String content) async {
     final response = await http.post(
-      Uri.parse('${ApiConstants.messages}/$roomId/messages'),
+      Uri.parse('${ApiConstants.chats}/$roomId/messages'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'senderId': senderId, 'content': content}),
     );
@@ -35,7 +35,7 @@ class ChatService {
 
   Future<List<dynamic>> getMessages(String roomId) async {
     final response = await http.get(
-      Uri.parse('${ApiConstants.messages}/$roomId/messages'),
+      Uri.parse('${ApiConstants.chats}/$roomId/messages'),
     );
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
