@@ -194,6 +194,15 @@ class _PetUpdatesScreenState extends State<PetUpdatesScreen> {
                           icon: const Icon(Icons.download_outlined, color: Colors.grey),
                           onPressed: () {
                             // Download functionality would go here
+                            PetUpdateService().downloadUpdate(update).then((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Image downloaded successfully')),
+                              );
+                            }).catchError((error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to download image: $error')),
+                              );
+                            });
                           },
                         ),
                       ],

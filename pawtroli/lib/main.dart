@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:pawtroli/screens/admin/admin_cctv_page.dart';
 import 'package:pawtroli/screens/admin/pet_update_upload.dart';
 import 'package:pawtroli/screens/chat/chat_page.dart';
@@ -123,13 +124,16 @@ class MyApp extends StatelessWidget {
           final adminId = args['adminId'] as String;
           final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-          return MaterialPageRoute(
-            builder: (context) => ChatPage(
+          return PageTransition(
+            child: ChatPage(
               chatId: chatId,
               currentUserId: currentUserId,
-              otherUserName: 'Staff', // Always use "Staff"
+              otherUserName: 'Staff',
               adminId: adminId,
             ),
+            type: PageTransitionType.fade, 
+            duration: const Duration(milliseconds: 300),
+            settings: settings,
           );
         }
 

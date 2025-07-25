@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pawtroli/widgets/auth_form_container.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/logo_header.dart';
 import '../../widgets/_background.dart';
@@ -106,19 +107,8 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _buildFormContainer() {
-    return Container(
+    return AuthFormContainer(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         children: [
           Padding(

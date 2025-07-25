@@ -5,6 +5,7 @@ class InfoCard extends StatefulWidget {
   final String value;
   final VoidCallback? onEdit;
   final ValueChanged<String>? onConfirm;
+  
   const InfoCard({
     super.key,
     required this.label,
@@ -39,10 +40,13 @@ class _InfoCardState extends State<InfoCard> {
     super.dispose();
   }
 
-  void _toggle() {
+  // Function to handle edit mode logic
+  void _handleEditPress() {
     if (_editing) {
+      // Confirm changes
       widget.onConfirm?.call(_ctrl.text);
     } else {
+      // Enter edit mode
       widget.onEdit?.call();
     }
     setState(() => _editing = !_editing);
@@ -80,7 +84,7 @@ class _InfoCardState extends State<InfoCard> {
                       size: 18,
                       color: Colors.grey[600]!.withOpacity(0.5),
                     ),
-                    onPressed: _toggle,
+                    onPressed: _handleEditPress, // Updated to use the new function
                     padding: const EdgeInsets.all(2),
                     constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                   ), 

@@ -22,6 +22,7 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
   final TextEditingController descriptionController = TextEditingController();
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
 
   Future<void> _getImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -119,10 +120,7 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
                       ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // Dropdowns row
               Row(
                 children: [
                   Expanded(
@@ -164,27 +162,55 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await PetUpdateService().addPetUpdate(
-                      PetUpdateModel(
-                        id: Uuid().v4(),
-                        caption: selectedActivity ?? '',
-                        timestamp: DateTime.now().toUtc(),
-                        description: descriptionController.text,
-                        imageUrl: "placeholder_for_image_url", // Replace with actual image upload logic
-                      ),
-                      petId: widget.petId ?? '',
-                  ).then((value) {
-                    if (value) {
+                    if (selectedCategory == null || selectedActivity == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Update posted successfully!')),
+                        const SnackBar(content: Text('Please select a category and activity')),
                       );
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to post update.')),
-                      );
+                      return;
                     }
-                  });
+                    
+                    setState(() => _isLoading = true);
+                    
+                    try {
+                      final petUpdateService = PetUpdateService();
+                      String imageUrl = "";
+                      
+                      // Upload image if available
+                      if (_image != null) {
+                        imageUrl = await petUpdateService.uploadPetUpdateImage(_image!, widget.petId ?? '');
+                      }
+                      
+                      // Now create the update with the actual image URL
+                      await petUpdateService.addPetUpdate(
+                        PetUpdateModel(
+                          id: const Uuid().v4(),
+                          caption: '$selectedCategory - $selectedActivity',
+                          timestamp: DateTime.now().toUtc(),
+                          description: descriptionController.text,
+                          imageUrl: imageUrl,  // Use the uploaded image URL
+                        ),
+                        petId: widget.petId ?? '',
+                      ).then((value) {
+                        if (value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Update posted successfully!')),
+                          );
+                          Navigator.pop(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Failed to post update.')),
+                          );
+                        }
+                      });
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isLoading = false);
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: DesignConstant.pawBlue,
@@ -192,13 +218,15 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  child: const Text(
-                    'POST', 
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.white
-                    ),
-                  ),
+                  child: _isLoading 
+                    ? CircularProgressIndicator(color: Colors.white) 
+                    : const Text(
+                        'POST', 
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),
+                      ),
                 ),
               ),
             ],

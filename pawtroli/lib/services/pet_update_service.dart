@@ -3,12 +3,34 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:developer' as developer;
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../models/pet_update_model.dart';
 import '../api_constants.dart';
 
 class PetUpdateService {
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  Future<String> uploadPetUpdateImage(File imageFile, String petId) async {
+    try {
+      // Create a reference with timestamp for unique filenames
+      final fileName = '${petId}_${DateTime.now().millisecondsSinceEpoch}';
+      final storageRef = _storage.ref().child('pet_updates/$fileName');
+      
+      // Upload file
+      final uploadTask = storageRef.putFile(imageFile);
+      final snapshot = await uploadTask.whenComplete(() {});
+      
+      // Get download URL
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      developer.log('Image uploaded to Firebase Storage: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      developer.log('Error uploading image to Firebase Storage: $e');
+      throw Exception('Failed to upload image: $e');
+    }
+  }
+
   Future<List<PetUpdateModel>> getPetUpdates(String petId) async {
     try {
       final uri = Uri.parse('${ApiConstants.pets}/$petId/updates');

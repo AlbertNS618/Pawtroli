@@ -1,5 +1,6 @@
 import 'dart:io'; // for SocketException
 import 'package:flutter/material.dart';
+import 'package:pawtroli/widgets/auth_form_container.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/logo_header.dart';
 import '../../widgets/_background.dart';
@@ -39,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: _phoneController.text.trim(),
       );
       widget.onRegister(user.id);
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/signin');
     }
     on SocketException {
       // network‐level error
@@ -75,19 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildFormContainer() {
-    return Container(
+    return AuthFormContainer(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         children: [
           Padding(
@@ -223,8 +213,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     });
                   },
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
                 ),
               ),
               validator: (val) {

@@ -48,8 +48,8 @@ class PetProfilePage extends StatelessWidget {
 
         bool showReminder = false;
         if (checkOutDate != null && pet.active == true) {
-          final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
+          final now = DateTime.now().toUtc();
+          final today = DateTime(now.year, now.month, now.day).toUtc();
           final checkoutDay = DateTime(checkOutDate.year, checkOutDate.month, checkOutDate.day);
           final difference = checkoutDay.difference(today).inDays;
 
@@ -107,26 +107,31 @@ class PetProfilePage extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       // Background "cut out" effect
-                      Container(
-                        width: 120,
+                      SizedBox(
                         height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white, // match your Scaffold background
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                        width: 120,
+                        child: ClipOval(
+                          child: Image.network(
+                            pet.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/images/pet_placeholder.png',
+                                fit: BoxFit.cover,
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      // Always use pet_placeholder image
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundImage: const AssetImage('assets/images/pet_placeholder.png'),
-                        backgroundColor: Colors.orange[100],
                       ),
                     ],
                   ),

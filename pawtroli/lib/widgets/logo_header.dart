@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pawtroli/design_constant.dart';
 
 class LogoHeader extends StatelessWidget {
   final double height;
@@ -9,7 +10,7 @@ class LogoHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color.fromRGBO(16, 48, 95, 1),
+      color: DesignConstant.pawBlue,
       child: Image.asset(
         'assets/images/logo.png',
         height: height,

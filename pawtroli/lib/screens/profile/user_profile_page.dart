@@ -12,6 +12,7 @@ class UserProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        toolbarHeight: 90,
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
         leading: IconButton(

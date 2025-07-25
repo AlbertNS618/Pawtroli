@@ -1,25 +1,62 @@
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/pet_model.dart';
 import '../api_constants.dart';
 
 class PetService {
-
-  Future<bool> registerPet(PetModel pet, {String? imageBase64}) async {
-    final body = pet.toJson();
-    developer.log('Registering pet with body: $body');
-    if (imageBase64 != null) {
-      body['imageBase64'] = imageBase64;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  
+  // Upload image to Firebase Storage and return the download URL
+  Future<String> uploadPetImage(File imageFile, String petId) async {
+    try {
+      // Create a reference with timestamp for unique filenames
+      final fileName = '${petId}_${DateTime.now().millisecondsSinceEpoch}';
+      final storageRef = _storage.ref().child('pets/$fileName');
+      
+      // Upload file
+      final uploadTask = storageRef.putFile(imageFile);
+      final snapshot = await uploadTask.whenComplete(() {});
+      
+      // Get download URL
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      developer.log('Image uploaded to Firebase Storage: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      developer.log('Error uploading image to Firebase Storage: $e');
+      throw Exception('Failed to upload image: $e');
     }
-    final response = await http.post(
-      Uri.parse(ApiConstants.pets),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
-    return response.statusCode == 200 || response.statusCode == 201;
+  }
+
+  Future<bool> registerPet(PetModel pet, {File? imageFile}) async {
+    try {
+      // If image file is provided, upload it to Firebase Storage
+      String? imageUrl;
+      if (imageFile != null) {
+        imageUrl = await uploadPetImage(imageFile, pet.petId);
+      }
+      
+      // Update pet model with the image URL
+      final updatedPet = pet.copyWith(imageUrl: imageUrl);
+      final body = updatedPet.toJson();
+      
+      developer.log('Registering pet with body: $body');
+      
+      final response = await http.post(
+        Uri.parse(ApiConstants.pets),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      developer.log('Error registering pet: $e');
+      throw Exception('Failed to register pet: $e');
+    }
   }
 
   Future<bool> activatePet(String petId, DateTime checkIn, DateTime checkOut) async {

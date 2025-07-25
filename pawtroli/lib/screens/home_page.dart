@@ -232,12 +232,30 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                ClipOval(
-                                  child: Image.asset(
-                                    'assets/images/pet_placeholder.png',
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 64,
+                                  width: 64,
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      pet['imageUrl'] ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/pet_placeholder.png',
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -318,12 +336,30 @@ class _HomePageState extends State<HomePage> {
                             child: Row(
                               children: [
                                 // Always use pet_placeholder and fix oval shape
-                                ClipOval(
-                                  child: Image.asset(
-                                    'assets/images/pet_placeholder.png',
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 64,
+                                  width: 64,
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      pet['imageUrl'] ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/pet_placeholder.png',
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),

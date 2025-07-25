@@ -154,7 +154,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         final petDoc = activePets[index];
                         final pet = petDoc.data() as Map<String, dynamic>;
                         final name = pet['name'] ?? pet['Name'] ?? '-';
-                        final imageUrl = pet['imageUrl'] ?? pet['ImageURL'] ?? pet['imageURL'] ?? '';
                         final isActive = pet['active'] as bool? ?? false;
 
                         return GestureDetector(
@@ -185,13 +184,31 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                ClipOval(
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(imageUrl, width: 64, height: 64, fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              Image.asset('assets/images/pet_placeholder.png', width: 64, height: 64, fit: BoxFit.cover),
-                                        )
-                                      : Image.asset('assets/images/pet_placeholder.png', width: 64, height: 64, fit: BoxFit.cover),
+                                SizedBox(
+                                  height: 64,
+                                  width: 64,
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      pet['imageUrl'] ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/pet_placeholder.png',
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -231,7 +248,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         final petDoc = activePets[index];
                         final pet = petDoc.data() as Map<String, dynamic>;
                         final name = pet['name'] ?? pet['Name'] ?? '-';
-                        final imageUrl = pet['imageUrl'] ?? pet['ImageURL'] ?? pet['imageURL'] ?? '';
                         final isActive = pet['active'] as bool? ?? false;
 
                         return GestureDetector(
@@ -259,13 +275,31 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             ),
                             child: Row(
                               children: [
-                                ClipOval(
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(imageUrl, width: 56, height: 56, fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              Image.asset('assets/images/pet_placeholder.png', width: 56, height: 56, fit: BoxFit.cover),
-                                        )
-                                      : Image.asset('assets/images/pet_placeholder.png', width: 56, height: 56, fit: BoxFit.cover),
+                                SizedBox(
+                                  height: 64,
+                                  width: 64,
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      pet['imageUrl'] ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/pet_placeholder.png',
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(

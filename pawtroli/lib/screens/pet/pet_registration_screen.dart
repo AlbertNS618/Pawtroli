@@ -43,7 +43,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
       setState(() => _loading = true);
 
       try {
-        // 1. Fetch only this user’s pets
+        // 1. Fetch only this user's pets
         final snap = await FirebaseFirestore.instance
             .collection('pets')
             .get();
@@ -58,7 +58,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
           type: type,
           age: age,
           ownerId: widget.userId,
-          imageUrl: '',
+          imageUrl: '', // Will be populated after upload
           gender: gender,
           color: color,
           allergy: allergy,
@@ -68,7 +68,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
         );
 
         final petService = PetService();
-        final success = await petService.registerPet(pet);
+        final success = await petService.registerPet(pet, imageFile: _image);
 
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
