@@ -13,7 +13,6 @@ class AdminCCTVPage extends StatefulWidget {
 
 class _AdminCCTVPageState extends State<AdminCCTVPage> {
   late VlcPlayerController _bedroomController;
-  // late VlcPlayerController _playgroundController;
 
   @override
   void initState() {
@@ -25,23 +24,14 @@ class _AdminCCTVPageState extends State<AdminCCTVPage> {
         autoPlay: true,
         options: VlcPlayerOptions(),
       );
-      // Example: Use a different RTSP or placeholder for playground
-      // _playgroundController = VlcPlayerController.network(
-      //   'rtsp://192.168.0.113:554/profile0', // Replace with actual playground RTSP if available
-      //   hwAcc: HwAcc.full,
-      //   autoPlay: true,
-      //   options: VlcPlayerOptions(),
-      // );
     } catch (e) {
       print('VLC error: $e');
-      // Handle error, show fallback UI or message
     }
   }
 
   @override
   void dispose() {
     _bedroomController.dispose();
-    // _playgroundController.dispose();
     super.dispose();
   }
 
@@ -52,20 +42,19 @@ class _AdminCCTVPageState extends State<AdminCCTVPage> {
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
-        toolbarHeight: 85, // <-- set exact height of AppBar
+        toolbarHeight: 85, 
         title: const Text(
           'CCTV',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        automaticallyImplyLeading: false, // This prevents the automatic back button
+        automaticallyImplyLeading: false,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildCameraCard('Bedroom', _bedroomController),
           const SizedBox(height: 16),
-          // _buildCameraCard('Playground', _playgroundController),
         ],
       ),
       bottomNavigationBar: BottomNavBar(

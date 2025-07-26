@@ -13,8 +13,8 @@ class PetModel {
   final String other;
   final String? status;
   final bool? active;
-  final dynamic checkIn;  // Keep as dynamic to handle timestamp format
-  final dynamic checkOut; // Keep as dynamic to handle timestamp format
+  final dynamic checkIn; 
+  final dynamic checkOut;
 
   PetModel({
     required this.petId,

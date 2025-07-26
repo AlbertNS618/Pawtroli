@@ -11,7 +11,7 @@ class AdminPetListPage extends StatefulWidget {
 }
 
 class _AdminPetListPageState extends State<AdminPetListPage> {
-  int _layoutMode = 0; // 0: grid, 1: list
+  int _layoutMode = 0;
   int _currentIndex = 0;
 
   @override

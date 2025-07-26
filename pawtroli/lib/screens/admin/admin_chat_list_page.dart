@@ -57,8 +57,6 @@ class AdminChatListPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final chatDoc = chats[index];
               final data = chatDoc.data() as Map<String, dynamic>;
-
-              // Determine the other user’s ID (as you already have)
               String otherUserId = '';
               if (data.containsKey('users')) {
                 final parts = List<String>.from(data['users']);
@@ -66,19 +64,15 @@ class AdminChatListPage extends StatelessWidget {
               } else {
                 otherUserId = data['userId'] as String? ?? '';
               }
-
-              // Pull out last message
               final lastMessage = data['lastMessage'] as String? ?? '';
 
               if (otherUserId.isEmpty) {
-                // Fallback if we couldn’t find a userId
                 return ListTile(
                   title: const Text('Unknown User'),
                   subtitle: Text(lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
                 );
               }
 
-              // Otherwise we have a non‐empty ID—safe to call .doc(...)
               return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('users')
@@ -137,6 +131,7 @@ class AdminChatListPage extends StatelessWidget {
           );
         },
       ),
+      
       bottomNavigationBar: BottomNavBar(
         currentIndex: 1,
         onTap: (index) {
