@@ -1,10 +1,9 @@
-// lib/models/user_model.dart
 class UserModel {
   final String id;
   final String email;
   final String name;
   final String phone;
-  final String role; // Default role
+  final String role;
   final String profileImage;
 
   UserModel({
@@ -21,7 +20,7 @@ class UserModel {
     'email': email,
     'name': name,
     'phone': phone,
-    'role': role, // Use the actual role value
+    'role': role,
     'profileImage': profileImage,
   };
 
@@ -30,7 +29,7 @@ class UserModel {
     name: json["name"] ?? "",
     email: json["email"] ?? "",
     phone: json["phone"] ?? "",
-    role: json["role"] ?? 'user', // Default to 'user' if not provided
+    role: json["role"] ?? 'user', // Default to 'user'
     profileImage: json["profileImage"] ?? "",
   );
 }

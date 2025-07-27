@@ -64,11 +64,9 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/register': (context) => RegisterScreen(
               onRegister: (userId) {
-                // After registration, navigate to home
                 Navigator.of(context).pushReplacementNamed('/home', arguments: userId);
               },
               onSigninTap: () {
-                // when user taps "Sign in here"
                 Navigator.of(context).pushNamed('/signin');
               },
             ),
@@ -93,7 +91,6 @@ class MyApp extends StatelessWidget {
                 }
               },
               onRegisterTap: () {
-                // when user taps "Register here"
                 Navigator.of(context).pushNamed('/register');
               },
             ),
@@ -137,7 +134,7 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        return null; // fallback if route not recognized
+        return null;
       },
     );
   }

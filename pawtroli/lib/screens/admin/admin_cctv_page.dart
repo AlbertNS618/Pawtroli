@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:pawtroli/design_constant.dart';
@@ -25,7 +27,7 @@ class _AdminCCTVPageState extends State<AdminCCTVPage> {
         options: VlcPlayerOptions(),
       );
     } catch (e) {
-      print('VLC error: $e');
+      developer.log('VLC error: $e');
     }
   }
 
@@ -65,7 +67,6 @@ class _AdminCCTVPageState extends State<AdminCCTVPage> {
           } else if (index == 1) {
             Navigator.pushReplacementNamed(context, '/admin_chat');
           } else if (index == 2) {
-            // Already on CCTV
           }
         },
       ),

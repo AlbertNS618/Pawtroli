@@ -35,7 +35,7 @@ class _PetUpdatesScreenState extends State<PetUpdatesScreen> {
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
-        toolbarHeight: 85, // Set exact height of AppBar
+        toolbarHeight: 85,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -193,8 +193,7 @@ class _PetUpdatesScreenState extends State<PetUpdatesScreen> {
                         IconButton(
                           icon: const Icon(Icons.download_outlined, color: Colors.grey),
                           onPressed: () {
-                            // Download functionality would go here
-                            PetUpdateService().downloadUpdate(update).then((_) {
+                            PetUpdateService().shareUpdate(update).then((_) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Image downloaded successfully')),
                               );

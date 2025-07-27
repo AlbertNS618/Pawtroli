@@ -180,14 +180,13 @@ class _PetUpdateUploadScreenState extends State<PetUpdateUploadScreen> {
                         imageUrl = await petUpdateService.uploadPetUpdateImage(_image!, widget.petId ?? '');
                       }
                       
-                      // Now create the update with the actual image URL
                       await petUpdateService.addPetUpdate(
                         PetUpdateModel(
                           id: const Uuid().v4(),
                           caption: '$selectedCategory - $selectedActivity',
                           timestamp: DateTime.now().toUtc(),
                           description: descriptionController.text,
-                          imageUrl: imageUrl,  // Use the uploaded image URL
+                          imageUrl: imageUrl,  
                         ),
                         petId: widget.petId ?? '',
                       ).then((value) {

@@ -2,9 +2,9 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:pawtroli/design_constant.dart';
-import 'package:pawtroli/widgets/info_card.dart'; // ← add this
+import 'package:pawtroli/widgets/info_card.dart';
 import '../../models/pet_model.dart';
-import '../../services/pet_service.dart'; // Import the PetService
+import '../../services/pet_service.dart'; 
 
 class PetProfilePage extends StatelessWidget {
   final String petId;
@@ -20,19 +20,14 @@ class PetProfilePage extends StatelessWidget {
         }
         final pet = snapshot.data!;
 
-        // final isActive = pet.active == true;
-
         // Improved checkout date parsing and reminder logic
         DateTime? checkOutDate;
         if (pet.checkOut != null) {
           try {
             developer.log("Raw checkOut value: ${pet.checkOut}");
-
-            // Handle ISO 8601 string format from Go backend
             if (pet.checkOut is String) {
               checkOutDate = DateTime.parse(pet.checkOut);
             }
-            // Handle Map format (legacy case)
             else if (pet.checkOut is Map) {
               final seconds = pet.checkOut['seconds'];
               if (seconds != null) {
@@ -106,7 +101,6 @@ class PetProfilePage extends StatelessWidget {
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Background "cut out" effect
                       SizedBox(
                         height: 120,
                         width: 120,
@@ -177,7 +171,6 @@ class PetProfilePage extends StatelessWidget {
                           ? null
                           : (v) => PetService().updateField(petId, 'allergy', v),
                       ),
-                      // Checked-In / Checked-Out get no callbacks at all:
                       InfoCard(
                         label: 'Checked-In',
                         value: pet.checkIn != null ? formatDate(pet.checkIn!) : '-',
@@ -215,8 +208,6 @@ class PetProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Remove the always-visible reminder container
-                  // Only show the reminder if showReminder is true
                   if (showReminder)
                     Container(
                       margin: const EdgeInsets.only(top: 16),
@@ -252,20 +243,15 @@ class PetProfilePage extends StatelessWidget {
 }
 
   String formatDate(dynamic dateValue) {
-    // 1) null/empty/default dash → '-'
     if (dateValue == null || dateValue == '' || dateValue == '-') {
       return '-';
     }
-
-    // 2) catch the default zero‐date string
     if (dateValue is String && dateValue.startsWith('0001-01-01')) {
       return '-';
     }
-    // 3) catch a parsed DateTime of year 1
     if (dateValue is DateTime && dateValue.year == 1) {
       return '-';
     }
-    // 4) catch a map with seconds == 0
     if (dateValue is Map) {
       final seconds = dateValue['seconds'];
       if (seconds != null) {

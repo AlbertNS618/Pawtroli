@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pawtroli/design_constant.dart';
 import '../../models/chat_message.dart';
-import '../../services/chat_service.dart'; // Import your ChatService
+import '../../services/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -14,7 +14,7 @@ class ChatPage extends StatefulWidget {
     required this.chatId,
     required this.currentUserId,
     required this.otherUserName,
-    required this.adminId, // Admin ID for potential future use
+    required this.adminId, 
   });
 
   @override
@@ -23,21 +23,20 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController _controller = TextEditingController();
-  final ChatService _chatService = ChatService(); // Initialize ChatService
-  final ScrollController _scrollController = ScrollController(); // Add this line
-  List<ChatMessage> _messages = []; // Store messages locally
+  final ChatService _chatService = ChatService(); 
+  final ScrollController _scrollController = ScrollController(); 
+  List<ChatMessage> _messages = []; 
   Timer? _pollingTimer;
   int _lastMessageCount = 0;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Add observer
+    WidgetsBinding.instance.addObserver(this); 
     _loadMessages();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _loadMessages();
     });
-    // Listen for keyboard open and scroll to bottom
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
@@ -45,24 +44,23 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Remove observer
+    WidgetsBinding.instance.removeObserver(this);
     _pollingTimer?.cancel();
     _controller.dispose();
-    _scrollController.dispose(); // Dispose the controller
+    _scrollController.dispose(); 
     super.dispose();
   }
 
   Future<void> _sendMessage(String content) async {
     await _chatService.sendMessage(widget.chatId, widget.currentUserId, content);
     _controller.clear();
-    await _loadMessages(); // Wait for messages to load
+    await _loadMessages(); 
     _scrollToBottom();
   }
 
   Future<void> _loadMessages() async {
     final messagesJson = await _chatService.getMessages(widget.chatId);
     final newMessages = messagesJson.map<ChatMessage>((msg) {
-      // ...existing mapping code...
       return ChatMessage(
         id: msg['id'] ?? '',
         senderId: msg['senderId'] ?? '',
@@ -92,7 +90,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     if (!_scrollController.hasClients) return true;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    // If user is within 100 pixels of the bottom, consider it "at the bottom"
     return (maxScroll - currentScroll) < 100;
   }
 
@@ -130,7 +127,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         children: [
           Expanded(
             child: ListView.builder(
-              controller: _scrollController, // Attach controller here
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               itemCount: _messages.length,
               itemBuilder: (context, index) {

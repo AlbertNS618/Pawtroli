@@ -23,19 +23,11 @@ class _CCTVPageState extends State<CCTVPage> {
       autoPlay: true,
       options: VlcPlayerOptions(),
     );
-    // Example: Use a different RTSP or placeholder for playground
-    // _playgroundController = VlcPlayerController.network(
-    //   'rtsp://192.168.0.113:554/profile0', // Replace with actual playground RTSP if available
-    //   hwAcc: HwAcc.full,
-    //   autoPlay: true,
-    //   options: VlcPlayerOptions(),
-    // );
   }
 
   @override
   void dispose() {
     _bedroomController.dispose();
-    // _playgroundController.dispose();
     super.dispose();
   }
 
@@ -46,7 +38,7 @@ class _CCTVPageState extends State<CCTVPage> {
       appBar: AppBar(
         backgroundColor: DesignConstant.pawBlue,
         elevation: 0,
-        toolbarHeight: 85, // <-- set exact height of AppBar
+        toolbarHeight: 85, 
         title: const Text('CCTV', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
         automaticallyImplyLeading: false, // This prevents the automatic back button
@@ -56,7 +48,6 @@ class _CCTVPageState extends State<CCTVPage> {
         children: [
           _buildCameraCard('Bedroom', _bedroomController),
           const SizedBox(height: 16),
-          // _buildCameraCard('Playground', _playgroundController),
         ],
       ),
       bottomNavigationBar: BottomNavBar(
@@ -65,9 +56,8 @@ class _CCTVPageState extends State<CCTVPage> {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/home');
           } else if (index == 1) {
-            goToChat(context); // Now imported from bottom_navbar.dart
+            goToChat(context); 
           } else if (index == 2) {
-            // Already on CCTV
           }
         },
       ),

@@ -11,18 +11,14 @@ import '../api_constants.dart';
 class PetService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   
-  // Upload image to Firebase Storage and return the download URL
   Future<String> uploadPetImage(File imageFile, String petId) async {
     try {
-      // Create a reference with timestamp for unique filenames
       final fileName = '${petId}_${DateTime.now().millisecondsSinceEpoch}';
       final storageRef = _storage.ref().child('pets/$fileName');
       
-      // Upload file
       final uploadTask = storageRef.putFile(imageFile);
       final snapshot = await uploadTask.whenComplete(() {});
       
-      // Get download URL
       final downloadUrl = await snapshot.ref.getDownloadURL();
       developer.log('Image uploaded to Firebase Storage: $downloadUrl');
       return downloadUrl;
@@ -34,13 +30,11 @@ class PetService {
 
   Future<bool> registerPet(PetModel pet, {File? imageFile}) async {
     try {
-      // If image file is provided, upload it to Firebase Storage
       String? imageUrl;
       if (imageFile != null) {
         imageUrl = await uploadPetImage(imageFile, pet.petId);
       }
       
-      // Update pet model with the image URL
       final updatedPet = pet.copyWith(imageUrl: imageUrl);
       final body = updatedPet.toJson();
       
@@ -100,9 +94,6 @@ class PetService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         developer.log('Pet data received: $data');
-        // data['checkIn'] = data['checkIn'] != null
-        //     ? DateTime.parse(data['checkIn']).toIso8601String()
-        //     : null;
         
         try {
           final pet = PetModel.fromJson(data);
@@ -122,7 +113,6 @@ class PetService {
     }
   }
 
-  /// Returns the latest 'caption' from pet_updates for the given petId.
   Future<String> getPetStatus(String? petId) async {
     if (petId == null || petId.isEmpty) {
       return 'No pet registered';
@@ -147,7 +137,6 @@ class PetService {
     }
   }
 
-  /// Updates a single field on the pet document.
   Future<bool> updateField(
       String petId, String fieldName, dynamic value) async {
     try {

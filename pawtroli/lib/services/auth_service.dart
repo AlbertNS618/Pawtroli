@@ -38,7 +38,6 @@ class AuthService {
         throw Exception('Backend error: ${response.body}');
       }
 
-      // Parse user data from backend response if available
       final data = jsonDecode(response.body);
       return UserModel.fromJson(data);
     } on TimeoutException {
@@ -61,7 +60,6 @@ class AuthService {
       }
     } catch (e) {
       throw AuthException('An error occurred. Please try again.');
-      // throw e;
     }
   }
 
@@ -98,7 +96,20 @@ class AuthService {
       return UserModel.fromJson(data);
 
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
+      switch (e.code) {
+        case 'email-already-in-use':
+          throw AuthException('An account already exists for that email.');
+        case 'invalid-email':
+          throw AuthException('The email address is not valid.');
+        case 'operation-not-allowed':
+          throw AuthException('Email/password accounts are not enabled.');
+        case 'weak-password':
+          throw AuthException('The password is too weak.');
+        default:
+          throw AuthException('Registration failed: ${e.message ?? e.code}');
+      }
+    } catch (e) {
+      throw AuthException('An error occurred. Please try again.');
     }
   }
 

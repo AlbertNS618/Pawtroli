@@ -43,13 +43,11 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
       setState(() => _loading = true);
 
       try {
-        // 1. Fetch only this user's pets
         final snap = await FirebaseFirestore.instance
             .collection('pets')
             .get();
         final currentCount = snap.docs.length;
-
-        // 2. Build petId as "PW" + (currentCount + 1)
+        
         final petId = 'PW_${currentCount + 1}';
 
         final pet = PetModel(
@@ -58,7 +56,7 @@ class _PetRegistrationScreenState extends State<PetRegistrationScreen> {
           type: type,
           age: age,
           ownerId: widget.userId,
-          imageUrl: '', // Will be populated after upload
+          imageUrl: '', 
           gender: gender,
           color: color,
           allergy: allergy,

@@ -68,12 +68,11 @@ class _PetActivationScreenState extends State<PetActivationScreen> {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 50),
         child: Form(
-          key: _formKey,                          // ← wrap in Form
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              // Pet ID input from form
               TextFormField(
                 controller: _petIdController,
                 textAlign: TextAlign.center,
@@ -111,7 +110,6 @@ class _PetActivationScreenState extends State<PetActivationScreen> {
               ),
 
               const SizedBox(height: 30),
-              // Checked-Out picker
               const Text('Checked-Out', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 8),
               GestureDetector(
@@ -139,19 +137,18 @@ class _PetActivationScreenState extends State<PetActivationScreen> {
                   width: 300,
                   child: ElevatedButton(
                     onPressed: () async {
-                      // validate form
                       if (!_formKey.currentState!.validate()) return;
 
-                      // activate on backend
                       final id = _petIdController.text.trim();
                       await PetService().activatePet(
                         id,
                         _checkInDate!,
                         _checkOutDate!,
                       );
-
-                      // once done, redirect back to the admin frhome page
-                      Navigator.of(context) .pushNamedAndRemoveUntil('/admin_home', (route) => false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pet activated successfully!')),
+                      );
+                      Navigator.of(context).pushNamedAndRemoveUntil('/admin_home', (route) => false);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: DesignConstant.pawBlue,

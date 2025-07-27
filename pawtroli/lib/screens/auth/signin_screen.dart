@@ -18,7 +18,6 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
-  // String? _error;
   bool _obscurePassword = true;
 
   final AuthService _authService = AuthService();
@@ -65,7 +64,7 @@ class _SignInScreenState extends State<SignInScreen> {
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30), // Makes the box rounded
+              borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(

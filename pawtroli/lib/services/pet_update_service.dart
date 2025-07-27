@@ -6,6 +6,9 @@ import 'dart:developer' as developer;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../models/pet_update_model.dart';
 import '../api_constants.dart';
 
@@ -13,15 +16,12 @@ class PetUpdateService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   Future<String> uploadPetUpdateImage(File imageFile, String petId) async {
     try {
-      // Create a reference with timestamp for unique filenames
       final fileName = '${petId}_${DateTime.now().millisecondsSinceEpoch}';
       final storageRef = _storage.ref().child('pet_updates/$fileName');
       
-      // Upload file
       final uploadTask = storageRef.putFile(imageFile);
       final snapshot = await uploadTask.whenComplete(() {});
       
-      // Get download URL
       final downloadUrl = await snapshot.ref.getDownloadURL();
       developer.log('Image uploaded to Firebase Storage: $downloadUrl');
       return downloadUrl;
@@ -99,27 +99,51 @@ class PetUpdateService {
     }
   }
 
-  Future<void> downloadUpdate(PetUpdateModel update) async {
-    if (update.imageUrl.isEmpty) return;
-    try {
-      final uri = Uri.parse(update.imageUrl);
-      final response = await http
-          .get(uri)
-          .timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = File('${dir.path}/${update.id}.jpg');
-        await file.writeAsBytes(response.bodyBytes);
-      } else {
-        throw Exception(
-          'Failed to download image (Status ${response.statusCode})');
+  Future<void> shareUpdate(PetUpdateModel update, {BuildContext? context}) async {
+    if (update.imageUrl.isEmpty) {
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No image to share')),
+        );
       }
-    } on SocketException {
-      throw Exception('No internet connection');
-    } on TimeoutException {
-      throw Exception('Image download timed out');
+      return;
+    }
+    
+    try {
+      // Show loading indicator
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Preparing image...')),
+        );
+      }
+      
+      // Create a temporary file
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/pawtroli_pet_update.jpg';
+      final tempFile = File(tempPath);
+      
+      // Download the image
+      final response = await http.get(Uri.parse(update.imageUrl));
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download image');
+      }
+      
+      // Save to temp file
+      await tempFile.writeAsBytes(response.bodyBytes);
+      
+      // Share the file
+      await Share.shareXFiles(
+        [XFile(tempPath)],
+        text: 'Pet update: ${update.caption}',
+        subject: 'Pawtroli Pet Update',
+      );
     } catch (e) {
-      throw Exception('Failed to download image: $e');
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+      rethrow;
     }
   }
 }

@@ -43,7 +43,6 @@ class ChatService {
     return [];
   }
 
-  /// Returns a map with 'senderId' and 'content' of the latest message.
   Future<Map<String,String>> getLatestMessageInfo(String chatId) async {
     try {
       final snap = await FirebaseFirestore.instance

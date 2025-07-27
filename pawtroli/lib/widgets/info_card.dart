@@ -43,10 +43,8 @@ class _InfoCardState extends State<InfoCard> {
   // Function to handle edit mode logic
   void _handleEditPress() {
     if (_editing) {
-      // Confirm changes
       widget.onConfirm?.call(_ctrl.text);
     } else {
-      // Enter edit mode
       widget.onEdit?.call();
     }
     setState(() => _editing = !_editing);
@@ -57,7 +55,6 @@ class _InfoCardState extends State<InfoCard> {
     final editable = widget.onEdit != null || widget.onConfirm != null;
 
     return Container(
-      // reduce overall padding
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -65,7 +62,7 @@ class _InfoCardState extends State<InfoCard> {
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: editable
-        //––– EDITABLE MODE –––
+        // EDITABLE MODE
         ? Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,16 +81,14 @@ class _InfoCardState extends State<InfoCard> {
                       size: 18,
                       color: Colors.grey[600]!.withOpacity(0.5),
                     ),
-                    onPressed: _handleEditPress, // Updated to use the new function
+                    onPressed: _handleEditPress, 
                     padding: const EdgeInsets.all(2),
                     constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                   ), 
                 ],
               ),
-              // shrink gap
               const SizedBox(height: 2),
               _editing
-                // cap TextField even further
                 ? SizedBox(
                     height: 28,
                     child: TextField(
@@ -114,7 +109,7 @@ class _InfoCardState extends State<InfoCard> {
                   ),
             ],
           )
-        //––– NON-EDITABLE MODE –––
+        // NON-EDITABLE MODE
         : Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

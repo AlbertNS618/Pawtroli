@@ -15,7 +15,7 @@ class AdminChatListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 90, // Set exact height of AppBar
+        toolbarHeight: 90,
         centerTitle: true,
         automaticallyImplyLeading: false,
         backgroundColor: DesignConstant.pawBlue,
@@ -27,7 +27,6 @@ class AdminChatListPage extends StatelessWidget {
       body:  StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('chats').snapshots(),
         builder: (context, snapshot) {
-          // Debug what's happening
           developer.log('Chat snapshot state: ${snapshot.connectionState}');
           if (snapshot.hasError) {
             developer.log('Chat error: ${snapshot.error}');
@@ -45,7 +44,6 @@ class AdminChatListPage extends StatelessWidget {
           // Log how many chat documents were returned
           developer.log('Found ${snapshot.data!.docs.length} chat documents');
 
-          // If first document exists, log its structure
           if (snapshot.data!.docs.isNotEmpty) {
             developer.log('First chat data: ${snapshot.data!.docs[0].data()}');
           }

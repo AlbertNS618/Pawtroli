@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:pawtroli/widgets/info_card.dart';
 import '../../models/pet_model.dart';
-import '../../services/pet_service.dart'; // Import the PetService
+import '../../services/pet_service.dart';
 import '../../models/user_model.dart';
 import '../../services/user_service.dart';
 
@@ -57,7 +57,7 @@ class AdminPetProfilePage extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<PetModel>(
-        future: PetService().getPetProfile(petId), // Use PetService here
+        future: PetService().getPetProfile(petId),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -69,11 +69,10 @@ class AdminPetProfilePage extends StatelessWidget {
             try {
               developer.log("Raw checkOut value: ${pet.checkOut}");
               
-              // Handle ISO 8601 string format from Go backend
+              // Handle ISO 8601 format
               if (pet.checkOut is String) {
                 checkOutDate = DateTime.parse(pet.checkOut);
               }
-              // Handle Map format (legacy case)
               else if (pet.checkOut is Map) {
                 final seconds = pet.checkOut['seconds'];
                 if (seconds != null) {
@@ -92,17 +91,14 @@ class AdminPetProfilePage extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  
-                  // Continue with the existing content (pet image, etc.)
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Background "cut out" effect
                       Container(
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Colors.white, // match your Scaffold background
+                          color: Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -113,7 +109,6 @@ class AdminPetProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Always use pet_placeholder image
                       CircleAvatar(
                         radius: 60,
                         backgroundImage: const AssetImage('assets/images/pet_placeholder.png'),
@@ -133,7 +128,7 @@ class AdminPetProfilePage extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 1.8, // Decreased from 2.0 to give more height
+                      childAspectRatio: 1.8,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
@@ -177,7 +172,6 @@ class AdminPetProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Pawrents container
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
@@ -188,7 +182,6 @@ class AdminPetProfilePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Title bar with "Pawrents"
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -204,7 +197,6 @@ class AdminPetProfilePage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Dynamic owner details
                         FutureBuilder<UserModel?>(
                           future: UserService().getUserById(pet.ownerId),
                           builder: (context, ownerSnapshot) {
@@ -273,11 +265,10 @@ class AdminPetProfilePage extends StatelessWidget {
       
       developer.log("Formatting date value type: ${dateValue.runtimeType}, value: $dateValue");
       
-      // Handle ISO 8601 string format (like "2025-05-30T04:30:00.082Z")
+      // Handle ISO 8601 string format 
       if (dateValue is String) {
         date = DateTime.parse(dateValue);
       }
-      // Handle Go's time.Time format which comes as a map
       else if (dateValue is Map) {
         final seconds = dateValue['seconds'];
         if (seconds != null) {
@@ -285,22 +276,19 @@ class AdminPetProfilePage extends StatelessWidget {
         } else {
           return dateValue.toString();
         }
-      } 
-      // Handle standard DateTime
+      }
       else if (dateValue is DateTime) {
         date = dateValue;
       }
-      // Fallback for other formats
       else {
         return dateValue.toString();
       }
       
-      // Format the date consistently
       final localTime = date.toLocal();
       final hour = localTime.hour % 12 == 0 ? 12 : localTime.hour % 12;
       final ampm = localTime.hour >= 12 ? 'pm' : 'am';
       
-      // Format like: "11:30 am, 30 May"
+      // Format the date string
       return "${hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')} $ampm, "
              "${localTime.day} ${_getMonthName(localTime.month)}";
     } catch (e) {
@@ -309,7 +297,7 @@ class AdminPetProfilePage extends StatelessWidget {
     }
   }
 
-  // Helper function to get month name
+  // function to get month name
   String _getMonthName(int month) {
     return [
       '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

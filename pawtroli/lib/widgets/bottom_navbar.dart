@@ -92,7 +92,7 @@ class BottomNavBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            decoration: const BoxDecoration(), // No background color for active
+            decoration: const BoxDecoration(),
             padding: const EdgeInsets.all(8),
             child: Image.asset(
               assetPath,

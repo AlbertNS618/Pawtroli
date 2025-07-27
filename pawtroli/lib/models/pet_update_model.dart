@@ -1,4 +1,6 @@
 
+import 'dart:developer' as developer;
+
 class PetUpdateModel {
   final String id;
   final String caption;
@@ -15,7 +17,6 @@ class PetUpdateModel {
   });
 
   factory PetUpdateModel.fromJson(Map<String, dynamic> json) {
-    // Parse timestamp from string to DateTime
     DateTime parsedTimestamp;
     try {
       final timestampValue = json['timestamp'] ?? json['Timestamp'];
@@ -26,11 +27,11 @@ class PetUpdateModel {
         final seconds = timestampValue['seconds'];
         parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
       } else {
-        parsedTimestamp = DateTime.now(); // Fallback
+        parsedTimestamp = DateTime.now();
       }
     } catch (e) {
-      print('Error parsing timestamp: $e');
-      parsedTimestamp = DateTime.now(); // Fallback on error
+      developer.log('Error parsing timestamp: $e');
+      parsedTimestamp = DateTime.now();
     }
 
     return PetUpdateModel(
